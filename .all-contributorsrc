@@ -1,0 +1,25 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Divyamdj",
+      "name": "Divyam Jain",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/43097792?v=4",
+      "profile": "https://github.com/Divyamdj",
+      "contributions": [
+        "code",
+        "projectManagement"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "AIBasedRecruitment",
+  "projectOwner": "jsparmani",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
