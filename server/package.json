@@ -1,0 +1,25 @@
+{
+  "name": "graphql-server",
+  "version": "1.0.0",
+  "description": "Backend Graphql server for the app",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsparmani/AIBasedRecruitment.git"
+  },
+  "author": "Jay Parmani",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jsparmani/AIBasedRecruitment/issues"
+  },
+  "homepage": "https://github.com/jsparmani/AIBasedRecruitment#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-graphql": "^0.11.0",
+    "graphql": "^15.3.0",
+    "lodash": "^4.17.20"
+  }
+}
