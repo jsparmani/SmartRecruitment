@@ -6,8 +6,8 @@ This repository contains code related to the Software Engineering Project made d
 
 # Screens
 <div align=center>
-  <img src="./AIRecruiter/assets/login.jpeg">
-  <img src="./AIRecruiter/assets/register.jpeg">
+  <img src="./AIRecruiter/assets/login.jpeg" height="200">
+  <img src="./AIRecruiter/assets/register.jpeg" height="200">
 </div>
 
 ## Contributors ✨
