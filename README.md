@@ -4,6 +4,12 @@
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 This repository contains code related to the Software Engineering Project made during 3rd year at B.E. TIET
 
+# Screens
+<div align=center>
+  <img src="./AIRecruiter/assets/login.jpeg">
+  <img src="./AIRecruiter/assets/register.jpeg">
+</div>
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
