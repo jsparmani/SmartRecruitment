@@ -1,5 +1,13 @@
+import {Profile} from "./Profile";
 import {Field, Int, ObjectType} from "type-graphql";
-import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {
+    BaseEntity,
+    Column,
+    Entity,
+    JoinColumn,
+    OneToOne,
+    PrimaryGeneratedColumn,
+} from "typeorm";
 import {UserRole} from "../types/userTypes";
 
 @ObjectType()
@@ -24,6 +32,11 @@ export class User extends BaseEntity {
         default: UserRole.CANDIDATE,
     })
     role: UserRole;
+
+    @Field(() => Profile, {nullable: true})
+    @OneToOne(() => Profile, {nullable: true})
+    @JoinColumn()
+    profile: Profile;
 
     @Column()
     password: string;

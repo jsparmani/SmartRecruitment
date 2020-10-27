@@ -1,3 +1,4 @@
+import {Profile} from "./entity/Profile";
 import {User} from "./entity/User";
 import "dotenv/config";
 import "reflect-metadata";
@@ -25,7 +26,7 @@ import {createConnection} from "typeorm";
         password: "test",
         logging: true,
         synchronize: true,
-        entities: [User],
+        entities: [User, Profile],
     });
 
     apolloServer.applyMiddleware({app});
