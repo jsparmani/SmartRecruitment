@@ -11,8 +11,8 @@ import { User } from '../entity/User';
 import { UserRole } from '../types/userTypes';
 import { validateRegister } from '../utils/validateRegister';
 import { createAccessToken, createRefreshToken } from './../utils/auth';
-import { LoginInput } from './LoginInput';
-import { RegisterInput } from './RegisterInput';
+import { LoginInput } from './inputs/LoginInput';
+import { RegisterInput } from './inputs/RegisterInput';
 
 @ObjectType()
 class FieldError {
@@ -78,7 +78,7 @@ export class UserResolver {
       }
     } catch (err) {
       if (err.code === '23505') {
-        // Duplicate username error
+        // Duplicate username or email
         return {
           errors: [
             {
