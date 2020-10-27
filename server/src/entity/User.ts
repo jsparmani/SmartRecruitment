@@ -1,37 +1,33 @@
-import { UserRole } from "../types/userTypes";
-import { Int, ObjectType, Field } from "type-graphql";
-import {Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToOne, JoinColumn} from "typeorm";
-import { Profile } from "./Profile";
+import {Field, Int, ObjectType} from "type-graphql";
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {UserRole} from "../types/userTypes";
 
 @ObjectType()
-@Entity("users")
-export class User extends BaseEntity{
-
+@Entity({name: "myusers"})
+export class User extends BaseEntity {
     @Field(() => Int)
     @PrimaryGeneratedColumn()
     id: number;
 
     @Field()
-    @Column()
+    @Column({unique: true})
     email: string;
+
+    @Field()
+    @Column({unique: true})
+    username: string;
 
     @Field(() => UserRole)
     @Column({
         type: "enum",
         enum: UserRole,
-        default: UserRole.CANDIDATE
+        default: UserRole.CANDIDATE,
     })
-    role: UserRole
+    role: UserRole;
 
     @Column()
     password: string;
 
-    @Field(() => Profile)
-    @OneToOne(_ => Profile)
-    @JoinColumn()
-    profile: Profile;
-
     @Column("int", {default: 0})
     tokenVersion: number;
-
 }
