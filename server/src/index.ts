@@ -1,7 +1,8 @@
+import "reflect-metadata";
+import {ProfileResolver} from "./resolvers/profile";
 import {Profile} from "./entity/Profile";
 import {User} from "./entity/User";
 import "dotenv/config";
-import "reflect-metadata";
 import express from "express";
 import {ApolloServer} from "apollo-server-express";
 import {buildSchema} from "type-graphql";
@@ -13,7 +14,7 @@ import {createConnection} from "typeorm";
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [UserResolver],
+            resolvers: [UserResolver, ProfileResolver],
             validate: false,
         }),
         context: ({req, res}) => ({req, res}),

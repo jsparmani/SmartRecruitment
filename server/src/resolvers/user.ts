@@ -17,21 +17,12 @@ class FieldError {
 }
 
 @ObjectType()
-class UserResponse {
+class AuthResponse {
+    @Field(() => User, {nullable: true})
+    user?: User;
+
     @Field(() => [FieldError], {nullable: true})
     errors?: FieldError[];
-
-    @Field(() => User, {nullable: true})
-    user?: User;
-}
-
-@ObjectType()
-class LoginResponse {
-    @Field(() => User, {nullable: true})
-    user?: User;
-
-    @Field(() => [FieldError], {nullable: true})
-    error?: FieldError[];
 
     @Field({nullable: true})
     accessToken?: string;
@@ -47,10 +38,10 @@ export class UserResolver {
         return "hi";
     }
 
-    @Mutation(() => UserResponse)
+    @Mutation(() => AuthResponse)
     async register(
         @Arg("input", () => RegisterInput) input: RegisterInput
-    ): Promise<UserResponse> {
+    ): Promise<AuthResponse> {
         const {username, email, password, role} = input;
 
         const errors = validateRegister(input);
@@ -92,23 +83,40 @@ export class UserResolver {
             }
         }
 
+        const accessToken = createAccessToken(user as User);
+        const refreshToken = createRefreshToken(user as User);
+
         return {
             user,
+            accessToken,
+            refreshToken,
         };
     }
 
-    @Mutation(() => LoginResponse)
+    @Mutation(() => AuthResponse)
     async login(
         @Arg("input", () => LoginInput) input: LoginInput
-    ): Promise<LoginResponse> {
+    ): Promise<AuthResponse> {
         const {usernameOrEmail, password} = input;
         const isEmail = usernameOrEmail.includes("@");
 
-        const user = await User.findOne(
-            isEmail
-                ? {where: {email: usernameOrEmail}}
-                : {where: {username: usernameOrEmail}}
-        );
+        let user;
+
+        if (isEmail) {
+            user = await User.findOne(
+                {email: usernameOrEmail},
+                {
+                    relations: ["profile"],
+                }
+            );
+        } else {
+            user = await User.findOne(
+                {username: usernameOrEmail},
+                {
+                    relations: ["profile"],
+                }
+            );
+        }
 
         if (!user) {
             return {

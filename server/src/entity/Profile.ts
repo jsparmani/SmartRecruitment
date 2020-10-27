@@ -22,9 +22,9 @@ export class Profile extends BaseEntity {
         type: "enum",
         enum: Gender,
     })
-    role: Gender;
+    gender: Gender;
 
     @Field({nullable: true})
-    @Column("bytea", {nullable: true})
+    @Column({nullable: true})
     photo: string;
 }
