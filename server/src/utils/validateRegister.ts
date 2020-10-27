@@ -6,11 +6,11 @@ export const validateRegister = (options: RegisterInput) => {
         return [{field: "email", message: "Invalid Email"}];
     }
 
-    if (username.length <= 2) {
+    if (username.length <= 4) {
         return [
             {
                 field: "username",
-                message: "Length must be greater than 2",
+                message: "Length must be greater than 4",
             },
         ];
     }
@@ -24,11 +24,11 @@ export const validateRegister = (options: RegisterInput) => {
         ];
     }
 
-    if (password.length <= 2) {
+    if (password.length <= 6) {
         return [
             {
                 field: "password",
-                message: "Length must be greater than 2",
+                message: "Length must be greater than 6",
             },
         ];
     }

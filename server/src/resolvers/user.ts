@@ -1,9 +1,11 @@
-import {hash} from "bcryptjs";
-import {validateRegister} from "../utils/validateRegister";
+import {compare, hash} from "bcryptjs";
 import {Arg, Field, Mutation, ObjectType, Query, Resolver} from "type-graphql";
 import {User} from "../entity/User";
-import {RegisterInput} from "./RegisterInput";
 import {UserRole} from "../types/userTypes";
+import {validateRegister} from "../utils/validateRegister";
+import {createAccessToken, createRefreshToken} from "./../utils/auth";
+import {LoginInput} from "./LoginInput";
+import {RegisterInput} from "./RegisterInput";
 
 @ObjectType()
 class FieldError {
@@ -21,6 +23,21 @@ class UserResponse {
 
     @Field(() => User, {nullable: true})
     user?: User;
+}
+
+@ObjectType()
+class LoginResponse {
+    @Field(() => User, {nullable: true})
+    user?: User;
+
+    @Field(() => [FieldError], {nullable: true})
+    error?: FieldError[];
+
+    @Field({nullable: true})
+    accessToken?: string;
+
+    @Field({nullable: true})
+    refreshToken?: string;
 }
 
 @Resolver()
@@ -50,7 +67,7 @@ export class UserResolver {
                 user = await User.create({
                     email,
                     username,
-                    password,
+                    password: hashedPassword,
                     role,
                 }).save();
             } else {
@@ -77,6 +94,45 @@ export class UserResolver {
 
         return {
             user,
+        };
+    }
+
+    @Mutation(() => LoginResponse)
+    async login(
+        @Arg("input", () => LoginInput) input: LoginInput
+    ): Promise<LoginResponse> {
+        const {usernameOrEmail, password} = input;
+        const isEmail = usernameOrEmail.includes("@");
+
+        const user = await User.findOne(
+            isEmail
+                ? {where: {email: usernameOrEmail}}
+                : {where: {username: usernameOrEmail}}
+        );
+
+        if (!user) {
+            return {
+                error: [
+                    {
+                        field: isEmail ? "email" : "username",
+                        message: "Does not exist",
+                    },
+                ],
+            };
+        }
+
+        const valid = await compare(password, user.password);
+
+        if (!valid) {
+            return {
+                error: [{field: "password", message: "Incorrect Password!"}],
+            };
+        }
+
+        return {
+            user,
+            accessToken: createAccessToken(user),
+            refreshToken: createRefreshToken(user),
         };
     }
 }
