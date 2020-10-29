@@ -1,6 +1,6 @@
+import { isCompany } from './../middleware/isCompany';
 import { User } from './../entity/User';
 import { MyContext } from './../types/MyContext';
-import { isAuth } from './../middleware/isAuth';
 import {
   Arg,
   Ctx,
@@ -24,7 +24,7 @@ class CompanyResponse {
 
 @Resolver()
 export class CompanyResolver {
-  @UseMiddleware(isAuth)
+  @UseMiddleware(isCompany)
   @Mutation(() => CompanyResponse, { nullable: true })
   async registerCompany(
     @Arg('name') name: string,
