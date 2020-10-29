@@ -1,3 +1,6 @@
+import { validateJob } from './../utils/validateJob';
+import { Job } from './../entity/Job';
+import { JobInput } from './inputs/JobInput';
 import { isCompany } from './../middleware/isCompany';
 import { User } from './../entity/User';
 import { MyContext } from './../types/MyContext';
@@ -17,6 +20,15 @@ import { FieldError } from './../types/FieldError';
 class CompanyResponse {
   @Field(() => Company, { nullable: true })
   company?: Company;
+
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+}
+
+@ObjectType()
+class JobResponse {
+  @Field(() => Job, { nullable: true })
+  job?: Job;
 
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
@@ -76,6 +88,58 @@ export class CompanyResolver {
 
     return {
       company,
+    };
+  }
+
+  @UseMiddleware(isCompany)
+  @Mutation(() => JobResponse)
+  async addJob(
+    @Arg('input', () => JobInput) input: JobInput,
+    @Ctx() { payload }: MyContext,
+  ): Promise<JobResponse> {
+    if (!payload?.userId) {
+      return {
+        errors: [{ field: 'userId', message: 'Invalid userId' }],
+      };
+    }
+
+    const { title, description } = input;
+
+    const errors = validateJob(input);
+    if (errors) {
+      return {
+        errors,
+      };
+    }
+
+    const user = await User.findOne(payload.userId);
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: 'userId',
+            message: 'Invalid User',
+          },
+        ],
+      };
+    }
+
+    const company = await Company.findOne({ where: { admin: user } });
+
+    if (!company) {
+      return {
+        errors: [{ field: 'user', message: 'Please register a company first' }],
+      };
+    }
+
+    let job = await Job.create({
+      title,
+      description,
+      company,
+    }).save();
+
+    return {
+      job,
     };
   }
 }

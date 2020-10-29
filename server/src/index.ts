@@ -1,3 +1,4 @@
+import { Job } from './entity/Job';
 import { CompanyResolver } from './resolvers/company';
 import { Company } from './entity/Company';
 import 'reflect-metadata';
@@ -29,7 +30,7 @@ import { createConnection } from 'typeorm';
     password: 'test',
     logging: true,
     synchronize: true,
-    entities: [User, Profile, Company],
+    entities: [User, Profile, Company, Job],
     migrations: ['migrations/*.js'],
     cli: {
       migrationsDir: 'migrations',

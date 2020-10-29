@@ -5,9 +5,11 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Job } from './Job';
 
 @ObjectType()
 @Entity()
@@ -24,4 +26,8 @@ export class Company extends BaseEntity {
   @OneToOne(() => User)
   @JoinColumn()
   admin: User;
+
+  @Field(() => [Job])
+  @OneToMany(() => Job, (job) => job.company)
+  jobs: Job[];
 }
