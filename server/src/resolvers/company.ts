@@ -1,3 +1,4 @@
+import { isAuth } from './../middleware/isAuth';
 import { validateJob } from './../utils/validateJob';
 import { Job } from './../entity/Job';
 import { JobInput } from './inputs/JobInput';
@@ -8,8 +9,10 @@ import {
   Arg,
   Ctx,
   Field,
+  Int,
   Mutation,
   ObjectType,
+  Query,
   Resolver,
   UseMiddleware,
 } from 'type-graphql';
@@ -36,6 +39,32 @@ class JobResponse {
 
 @Resolver()
 export class CompanyResolver {
+  @UseMiddleware(isAuth)
+  @Query(() => [Job])
+  async jobs(): Promise<Job[]> {
+    return await Job.find({ relations: ['company'] });
+  }
+
+  @UseMiddleware(isAuth)
+  @Query(() => Job, { nullable: true })
+  async job(@Arg('id', () => Int) id: number): Promise<Job | undefined> {
+    return await Job.findOne(id, { relations: ['company'] });
+  }
+
+  @UseMiddleware(isAuth)
+  @Query(() => [Company])
+  async companies() {
+    return await Company.find({ relations: ['jobs'] });
+  }
+
+  @UseMiddleware(isAuth)
+  @Query(() => Company, { nullable: true })
+  async company(
+    @Arg('id', () => Int) id: number,
+  ): Promise<Company | undefined> {
+    return await Company.findOne(id, { relations: ['jobs'] });
+  }
+
   @UseMiddleware(isCompany)
   @Mutation(() => CompanyResponse, { nullable: true })
   async registerCompany(
@@ -128,7 +157,9 @@ export class CompanyResolver {
 
     if (!company) {
       return {
-        errors: [{ field: 'user', message: 'Please register a company first' }],
+        errors: [
+          { field: 'company', message: 'Please register a company first' },
+        ],
       };
     }
 

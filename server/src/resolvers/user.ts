@@ -1,3 +1,5 @@
+import { User } from './../entity/User';
+import { isAdmin } from './../middleware/isAdmin';
 import { compare, hash } from 'bcryptjs';
 import { FieldError } from '../types/FieldError';
 import {
@@ -7,6 +9,7 @@ import {
   ObjectType,
   Query,
   Resolver,
+  UseMiddleware,
 } from 'type-graphql';
 import { User } from '../entity/User';
 import { UserRole } from '../types/userTypes';
@@ -32,9 +35,10 @@ class AuthResponse {
 
 @Resolver()
 export class UserResolver {
-  @Query(() => String)
-  hello(): String {
-    return 'hi';
+  @UseMiddleware(isAdmin)
+  @Query(() => [User])
+  async users(): Promise<User[]> {
+    return await User.find({ relations: ['profile'] });
   }
 
   @Mutation(() => AuthResponse)

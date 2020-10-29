@@ -1,3 +1,4 @@
+import { __prod__ } from './constants';
 import { Job } from './entity/Job';
 import { CompanyResolver } from './resolvers/company';
 import { Company } from './entity/Company';
@@ -29,7 +30,7 @@ import { createConnection } from 'typeorm';
     username: 'test',
     password: 'test',
     logging: true,
-    synchronize: true,
+    synchronize: !__prod__,
     entities: [User, Profile, Company, Job],
     migrations: ['migrations/*.js'],
     cli: {
