@@ -1,3 +1,4 @@
+import { isCandidate } from './../middleware/isCandidate';
 import { Job } from './../entity/Job';
 import { MyContext } from './../types/MyContext';
 import { User } from './../entity/User';
@@ -150,6 +151,7 @@ export class UserResolver {
     };
   }
 
+  @UseMiddleware(isCandidate)
   @Mutation(() => Boolean)
   async applyJob(
     @Arg('jobId', () => Int) id: number,
