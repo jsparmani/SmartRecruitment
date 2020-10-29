@@ -14,4 +14,7 @@ export class ProfileInput {
 
   @Field({ nullable: true })
   photo?: string;
+
+  @Field({ nullable: true })
+  resume?: string;
 }

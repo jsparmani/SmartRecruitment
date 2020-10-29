@@ -66,7 +66,7 @@ export class ProfileResolver {
       relations: ['profile'],
     });
 
-    const { name, age, photo, gender } = input;
+    const { name, age, photo, gender, resume } = input;
 
     if (!user) {
       return {
@@ -93,6 +93,9 @@ export class ProfileResolver {
       profile.gender = gender;
       if (photo) {
         profile.photo = photo;
+      }
+      if (resume) {
+        profile.resume = resume;
       }
       return {
         profile: await profile.save(),

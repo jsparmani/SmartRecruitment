@@ -25,6 +25,10 @@ export class Profile extends BaseEntity {
   gender: Gender;
 
   @Field({ nullable: true })
-  @Column({nullable: true})
+  @Column({ nullable: true })
   photo: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  resume: string;
 }
