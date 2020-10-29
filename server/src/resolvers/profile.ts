@@ -36,7 +36,7 @@ export class ProfileResolver {
     }
 
     let user = await User.findOne(parseInt(payload.userId), {
-      relations: ['profile'],
+      relations: ['profile', 'appliedJobs'],
     });
     if (!user) {
       throw new Error('User does not exist!');

@@ -1,10 +1,14 @@
+import { Job } from './../entity/Job';
+import { MyContext } from './../types/MyContext';
 import { User } from './../entity/User';
 import { isAdmin } from './../middleware/isAdmin';
 import { compare, hash } from 'bcryptjs';
 import { FieldError } from '../types/FieldError';
 import {
   Arg,
+  Ctx,
   Field,
+  Int,
   Mutation,
   ObjectType,
   Query,
@@ -144,5 +148,32 @@ export class UserResolver {
       accessToken: createAccessToken(user),
       refreshToken: createRefreshToken(user),
     };
+  }
+
+  @Mutation(() => Boolean)
+  async applyJob(
+    @Arg('jobId', () => Int) id: number,
+    @Ctx() { payload }: MyContext,
+  ): Promise<Boolean> {
+    const user = await User.findOne(payload?.userId);
+
+    if (!user) {
+      throw new Error('Invalid User');
+    }
+
+    const job = await Job.findOne(id, { relations: ['appliedCandidates'] });
+    if (!job) {
+      throw new Error('No such job exists');
+    }
+
+    try {
+      job.appliedCandidates.push(user);
+      await job.save();
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+
+    return true;
   }
 }

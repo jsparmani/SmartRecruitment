@@ -27,7 +27,7 @@ export class Company extends BaseEntity {
   @JoinColumn()
   admin: User;
 
-  @Field(() => [Job])
+  @Field(() => [Job], { nullable: true })
   @OneToMany(() => Job, (job) => job.company)
   jobs: Job[];
 }

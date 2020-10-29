@@ -48,13 +48,15 @@ export class CompanyResolver {
   @UseMiddleware(isAuth)
   @Query(() => Job, { nullable: true })
   async job(@Arg('id', () => Int) id: number): Promise<Job | undefined> {
-    return await Job.findOne(id, { relations: ['company'] });
+    return await Job.findOne(id, {
+      relations: ['company', 'appliedCandidates'],
+    });
   }
 
   @UseMiddleware(isAuth)
   @Query(() => [Company])
   async companies() {
-    return await Company.find({ relations: ['jobs'] });
+    return await Company.find({ relations: ['admin'] });
   }
 
   @UseMiddleware(isAuth)
@@ -62,7 +64,7 @@ export class CompanyResolver {
   async company(
     @Arg('id', () => Int) id: number,
   ): Promise<Company | undefined> {
-    return await Company.findOne(id, { relations: ['jobs'] });
+    return await Company.findOne(id, { relations: ['jobs', 'admin'] });
   }
 
   @UseMiddleware(isCompany)
