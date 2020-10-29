@@ -1,4 +1,5 @@
 import { compare, hash } from 'bcryptjs';
+import { FieldError } from '../types/FieldError';
 import {
   Arg,
   Field,
@@ -13,15 +14,6 @@ import { validateRegister } from '../utils/validateRegister';
 import { createAccessToken, createRefreshToken } from './../utils/auth';
 import { LoginInput } from './inputs/LoginInput';
 import { RegisterInput } from './inputs/RegisterInput';
-
-@ObjectType()
-class FieldError {
-  @Field()
-  field: string;
-
-  @Field()
-  message: string;
-}
 
 @ObjectType()
 class AuthResponse {

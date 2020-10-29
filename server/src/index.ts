@@ -1,3 +1,5 @@
+import { CompanyResolver } from './resolvers/company';
+import { Company } from './entity/Company';
 import 'reflect-metadata';
 import { ProfileResolver } from './resolvers/profile';
 import { Profile } from './entity/Profile';
@@ -14,7 +16,7 @@ import { createConnection } from 'typeorm';
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, ProfileResolver],
+      resolvers: [UserResolver, ProfileResolver, CompanyResolver],
       validate: false,
     }),
     context: ({ req, res }) => ({ req, res }),
@@ -27,7 +29,7 @@ import { createConnection } from 'typeorm';
     password: 'test',
     logging: true,
     synchronize: true,
-    entities: [User, Profile],
+    entities: [User, Profile, Company],
     migrations: ['migrations/*.js'],
     cli: {
       migrationsDir: 'migrations',
