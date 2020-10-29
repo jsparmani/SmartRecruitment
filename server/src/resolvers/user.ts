@@ -11,7 +11,6 @@ import {
   Resolver,
   UseMiddleware,
 } from 'type-graphql';
-import { User } from '../entity/User';
 import { UserRole } from '../types/userTypes';
 import { validateRegister } from '../utils/validateRegister';
 import { createAccessToken, createRefreshToken } from './../utils/auth';
