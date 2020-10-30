@@ -42,15 +42,15 @@ class Index extends Component {
           options={{
             headerShown: false,
           }}
-          component={SignInScreen}
-          name="SignIn"
+          component={SignUpScreen}
+          name="SignUp"
         />
         <Stack.Screen
           options={{
             headerShown: false,
           }}
-          component={SignUpScreen}
-          name="SignUp"
+          component={SignInScreen}
+          name="SignIn"
         />
       </Stack.Navigator>
     );
