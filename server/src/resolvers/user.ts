@@ -1,4 +1,3 @@
-import { getConnection } from 'typeorm';
 import { isCandidate } from './../middleware/isCandidate';
 import { Job } from './../entity/Job';
 import { MyContext } from './../types/MyContext';
