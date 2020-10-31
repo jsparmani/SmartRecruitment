@@ -1,3 +1,4 @@
+import { isCandidate } from './../middleware/isCandidate';
 import { validateQuestions } from './../utils/validateQuestions';
 import { QuestionsInput } from './inputs/QuestionsInput';
 import { Company } from '../entity/Company';
@@ -29,8 +30,6 @@ class JobResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 }
-
-// TODO: All Job Operations should be restricted to be only performed by the admin of the company and not just a company user as is the case now.
 
 @Resolver()
 export class JobResolver {
@@ -108,13 +107,14 @@ export class JobResolver {
     @Arg('input', () => QuestionsInput) input: QuestionsInput,
     @Ctx() { payload }: MyContext,
   ): Promise<JobResponse> {
-    if (!(await User.findOne(payload?.userId))) {
+    const user = await User.findOne(payload?.userId);
+    if (!user) {
       throw new Error('No such user exists');
     }
 
     const { questions, jobId } = input;
 
-    const job = await Job.findOne(jobId);
+    const job = await Job.findOne(jobId, { relations: ['company'] });
 
     if (!job) {
       return {
@@ -125,6 +125,12 @@ export class JobResolver {
           },
         ],
       };
+    }
+
+    if (job.company.admin.username !== user.username) {
+      throw new Error(
+        "Invalid Operation. You can't edit a job that doesn't belong to you",
+      );
     }
 
     const errors = validateQuestions(input);
@@ -140,5 +146,62 @@ export class JobResolver {
     return {
       job,
     };
+  }
+  @UseMiddleware(isCandidate)
+  @Mutation(() => Boolean)
+  async applyJob(
+    @Arg('jobId', () => Int) id: number,
+    @Ctx() { payload }: MyContext,
+  ): Promise<Boolean> {
+    const user = await User.findOne(payload?.userId);
+
+    if (!user) {
+      throw new Error('Invalid User');
+    }
+
+    const job = await Job.findOne(id, { relations: ['appliedCandidates'] });
+    if (!job) {
+      throw new Error('No such job exists');
+    }
+
+    try {
+      job.appliedCandidates.push(user);
+      await job.save();
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+
+    return true;
+  }
+
+  @UseMiddleware(isCandidate)
+  @Mutation(() => Boolean)
+  async unapplyJob(
+    @Arg('jobId', () => Int) id: number,
+    @Ctx() { payload }: MyContext,
+  ): Promise<Boolean> {
+    const user = await User.findOne(payload?.userId);
+
+    if (!user) {
+      throw new Error('Invalid User');
+    }
+
+    const job = await Job.findOne(id, { relations: ['appliedCandidates'] });
+    if (!job) {
+      throw new Error('No such job exists');
+    }
+
+    try {
+      job.appliedCandidates = job.appliedCandidates.filter((candidate) => {
+        candidate.id !== user.id;
+      });
+      job.save();
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+
+    return true;
   }
 }
