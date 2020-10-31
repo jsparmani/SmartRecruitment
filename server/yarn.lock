@@ -1054,6 +1054,11 @@ get-caller-file@^2.0.1, get-caller-file@^2.0.5:
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
 
+get-them-args@1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/get-them-args/-/get-them-args-1.3.2.tgz#74a20ba8a4abece5ae199ad03f2bcc68fdfc9ba5"
+  integrity sha1-dKILqKSr7OWuGZrQPyvMaP38m6U=
+
 glob@^7.1.6:
   version "7.1.6"
   resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.6.tgz#141f33b81a7c2492e125594307480c46679278a6"
@@ -1301,6 +1306,14 @@ jws@^3.2.2:
   dependencies:
     jwa "^1.4.1"
     safe-buffer "^5.0.1"
+
+kill-port@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/kill-port/-/kill-port-1.6.1.tgz#560fe79484583bdf3a5e908557dae614447618aa"
+  integrity sha512-un0Y55cOM7JKGaLnGja28T38tDDop0AQ8N0KlAdyh+B1nmMoX8AnNmqPNZbS3mUMgiST51DCVqmbFT1gNJpVNw==
+  dependencies:
+    get-them-args "1.3.2"
+    shell-exec "1.0.2"
 
 locate-path@^5.0.0:
   version "5.0.0"
@@ -1783,6 +1796,11 @@ sha.js@^2.4.11:
   dependencies:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
+
+shell-exec@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/shell-exec/-/shell-exec-1.0.2.tgz#2e9361b0fde1d73f476c4b6671fa17785f696756"
+  integrity sha512-jyVd+kU2X+mWKMmGhx4fpWbPsjvD53k9ivqetutVW/BQ+WIZoDoP4d8vUMGezV6saZsiNoW2f9GIhg9Dondohg==
 
 source-map-support@^0.5.17:
   version "0.5.19"
