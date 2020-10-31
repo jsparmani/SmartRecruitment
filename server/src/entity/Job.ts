@@ -34,4 +34,8 @@ export class Job extends BaseEntity {
   @ManyToMany(() => User, (user) => user.appliedJobs)
   @JoinTable()
   appliedCandidates: User[];
+
+  @Field(() => [String])
+  @Column('simple-array', { default: '' })
+  questions: string[];
 }

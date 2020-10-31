@@ -1,8 +1,9 @@
+import 'reflect-metadata';
+import { JobResolver } from './resolvers/job';
 import { __prod__ } from './constants';
 import { Job } from './entity/Job';
 import { CompanyResolver } from './resolvers/company';
 import { Company } from './entity/Company';
-import 'reflect-metadata';
 import { ProfileResolver } from './resolvers/profile';
 import { Profile } from './entity/Profile';
 import { User } from './entity/User';
@@ -18,7 +19,7 @@ import { createConnection } from 'typeorm';
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, ProfileResolver, CompanyResolver],
+      resolvers: [UserResolver, ProfileResolver, CompanyResolver, JobResolver],
       validate: false,
     }),
     context: ({ req, res }) => ({ req, res }),
@@ -32,7 +33,7 @@ import { createConnection } from 'typeorm';
     logging: true,
     synchronize: !__prod__,
     entities: [User, Profile, Company, Job],
-    migrations: ['migrations/*.js'],
+    migrations: ['./migrations/*.js'],
     cli: {
       migrationsDir: 'migrations',
     },
