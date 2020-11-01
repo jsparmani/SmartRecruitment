@@ -1,3 +1,5 @@
+import { validateCompany } from './../utils/validateCompany';
+import { CompanyInput } from './inputs/CompanyInput';
 import {
   Arg,
   Ctx,
@@ -44,7 +46,7 @@ export class CompanyResolver {
   @UseMiddleware(isCompany)
   @Mutation(() => CompanyResponse, { nullable: true })
   async registerCompany(
-    @Arg('name') name: string,
+    @Arg('input', () => CompanyInput) input: CompanyInput,
     @Ctx() { payload }: MyContext,
   ): Promise<CompanyResponse> {
     if (!payload?.userId) {
@@ -52,9 +54,14 @@ export class CompanyResolver {
         errors: [{ field: 'userId', message: 'Invalid userId' }],
       };
     }
-    if (!name) {
+
+    const { name, location } = input;
+
+    const errors = validateCompany(input);
+
+    if (errors) {
       return {
-        errors: [{ field: 'name', message: 'cannot be empty' }],
+        errors,
       };
     }
 
@@ -76,6 +83,7 @@ export class CompanyResolver {
       company = await Company.create({
         name: name,
         admin: user,
+        location: location,
       }).save();
     } catch (err) {
       if (err.code === '23505') {
