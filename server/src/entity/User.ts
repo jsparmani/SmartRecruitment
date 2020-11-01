@@ -7,10 +7,12 @@ import {
   Entity,
   JoinColumn,
   ManyToMany,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserRole } from '../types/userTypes';
+import { Response } from './Response';
 
 @ObjectType()
 @Entity({ name: 'myusers' })
@@ -43,6 +45,10 @@ export class User extends BaseEntity {
   @Field(() => [Job], { nullable: true })
   @ManyToMany(() => Job, (job) => job.appliedCandidates)
   appliedJobs: Job[];
+
+  @Field(() => [Response], { nullable: true })
+  @OneToMany(() => Response, (response) => response.user)
+  responses: Response[];
 
   @Column()
   password: string;

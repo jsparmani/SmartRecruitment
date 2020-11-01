@@ -1,3 +1,4 @@
+import { ResponseResolver } from './resolvers/response';
 import 'reflect-metadata';
 import { JobResolver } from './resolvers/job';
 import { __prod__ } from './constants';
@@ -15,7 +16,13 @@ import { createConnection } from 'typeorm';
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, ProfileResolver, CompanyResolver, JobResolver],
+      resolvers: [
+        UserResolver,
+        ProfileResolver,
+        CompanyResolver,
+        JobResolver,
+        ResponseResolver,
+      ],
       validate: false,
     }),
     context: ({ req, res }) => ({ req, res }),

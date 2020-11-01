@@ -8,8 +8,10 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Response } from './Response';
 
 @ObjectType()
 @Entity()
@@ -38,4 +40,8 @@ export class Job extends BaseEntity {
   @Field(() => [String])
   @Column('simple-array', { default: '' })
   questions: string[];
+
+  @Field(() => [Response])
+  @OneToMany(() => Response, (response) => response.job)
+  responses: Response[];
 }
