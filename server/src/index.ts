@@ -21,9 +21,9 @@ import { createConnection } from 'typeorm';
     context: ({ req, res }) => ({ req, res }),
   });
 
-  await createConnection();
+  const conn = await createConnection();
 
-  // await conn.runMigrations();
+  await conn.runMigrations();
 
   apolloServer.applyMiddleware({ app });
 

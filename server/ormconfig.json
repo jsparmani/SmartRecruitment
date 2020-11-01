@@ -5,13 +5,13 @@
     "username": "test",
     "password": "test",
     "database": "airecruitments",
-    "synchronize": true,
+    "synchronize": false,
     "logging": true,
     "entities": [
       "dist/entity/*.js"
     ],
     "migrations": [
-      "dist/migrations/*.js"
+      "dist/migration/*.js"
     ],
     "cli": {
       "entitiesDir": "src/entity",

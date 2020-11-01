@@ -22,6 +22,10 @@ export class Company extends BaseEntity {
   @Column()
   name: string;
 
+  @Field()
+  @Column()
+  location: string;
+
   @Field(() => User)
   @OneToOne(() => User)
   @JoinColumn()
