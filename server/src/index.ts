@@ -1,12 +1,8 @@
 import 'reflect-metadata';
 import { JobResolver } from './resolvers/job';
 import { __prod__ } from './constants';
-import { Job } from './entity/Job';
 import { CompanyResolver } from './resolvers/company';
-import { Company } from './entity/Company';
 import { ProfileResolver } from './resolvers/profile';
-import { Profile } from './entity/Profile';
-import { User } from './entity/User';
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
@@ -25,19 +21,9 @@ import { createConnection } from 'typeorm';
     context: ({ req, res }) => ({ req, res }),
   });
 
-  await createConnection({
-    type: 'postgres',
-    database: 'airecruitments',
-    username: 'test',
-    password: 'test',
-    logging: true,
-    synchronize: !__prod__,
-    entities: [User, Profile, Company, Job],
-    migrations: ['./migrations/*.js'],
-    cli: {
-      migrationsDir: 'migrations',
-    },
-  });
+  await createConnection();
+
+  // await conn.runMigrations();
 
   apolloServer.applyMiddleware({ app });
 
