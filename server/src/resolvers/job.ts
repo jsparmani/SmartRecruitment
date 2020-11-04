@@ -22,6 +22,8 @@ import {
 } from 'type-graphql';
 import { JobInput } from './inputs/JobInput';
 
+//TODO: Add checks that the profile must be complete before doing job operations
+
 @ObjectType()
 class JobResponse {
   @Field(() => Job, { nullable: true })
@@ -126,6 +128,8 @@ export class JobResolver {
         ],
       };
     }
+
+    //TODO: Only a job that belongs to a user could be edited, others cannot be edited
 
     // FIXME: Below code doesn't work, mainly job.company.admin.username is undefined
 

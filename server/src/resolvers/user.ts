@@ -1,3 +1,4 @@
+import { verify } from 'jsonwebtoken';
 import { User } from './../entity/User';
 import { isAdmin } from './../middleware/isAdmin';
 import { compare, hash } from 'bcryptjs';
@@ -5,6 +6,7 @@ import { FieldError } from '../types/FieldError';
 import {
   Arg,
   Field,
+  Int,
   Mutation,
   ObjectType,
   Query,
@@ -16,6 +18,7 @@ import { validateRegister } from '../utils/validateRegister';
 import { createAccessToken, createRefreshToken } from './../utils/auth';
 import { LoginInput } from './inputs/LoginInput';
 import { RegisterInput } from './inputs/RegisterInput';
+import { getConnection } from 'typeorm';
 
 @ObjectType()
 class AuthResponse {
@@ -144,5 +147,75 @@ export class UserResolver {
       accessToken: createAccessToken(user),
       refreshToken: createRefreshToken(user),
     };
+  }
+
+  @Mutation(() => AuthResponse)
+  async refreshMyToken(
+    @Arg('refreshToken') token: string,
+  ): Promise<AuthResponse> {
+    if (!token) {
+      return {
+        errors: [
+          {
+            field: 'refreshToken',
+            message: 'token cannot be empty',
+          },
+        ],
+      };
+    }
+
+    let payload: any = null;
+    try {
+      payload = verify(token, process.env.REFRESH_TOKEN_SECRET!);
+    } catch (err) {
+      console.log(err);
+      return {
+        errors: [
+          {
+            field: 'tokenerror',
+            message: 'Cannot validate the token',
+          },
+        ],
+      };
+    }
+
+    let user = await User.findOne(payload.userId);
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: 'user',
+            message: 'No such user exists',
+          },
+        ],
+      };
+    }
+
+    if (user.tokenVersion !== payload.tokenVersion) {
+      return {
+        errors: [
+          {
+            field: 'tokenerror',
+            message: 'The token is invalid',
+          },
+        ],
+      };
+    }
+
+    return {
+      user,
+      accessToken: createAccessToken(user),
+      refreshToken: createRefreshToken(user),
+    };
+  }
+
+  @UseMiddleware(isAdmin)
+  @Mutation(() => Boolean)
+  async revokeRefreshTokensForUser(@Arg('userId', () => Int) userId: number) {
+    await getConnection()
+      .getRepository(User)
+      .increment({ id: userId }, 'tokenVersion', 1);
+
+    return true;
   }
 }
