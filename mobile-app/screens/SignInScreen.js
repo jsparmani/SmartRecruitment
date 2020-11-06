@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -16,13 +16,76 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {ScrollView} from 'react-native-gesture-handler';
 import TextInputCustom from '../Components/TextInputCustom';
+import {gql, useMutation} from '@apollo/client';
+import ErrorMessage from '../Components/ErrorMessage';
+import {setLoginUser} from '../src/actions/dataAction';
+import {connect} from 'react-redux';
 
-export default function SignInScreen(props) {
+const login_mutation = gql`
+  mutation Login($input: LoginInput!) {
+    login(input: $input) {
+      user {
+        role
+        id
+        username
+        email
+        profile {
+          name
+          age
+          gender
+          photo
+          resume
+        }
+      }
+      errors {
+        field
+        message
+      }
+      accessToken
+      refreshToken
+    }
+  }
+`;
+
+function SignInScreen(props) {
   const {width, height} = Dimensions.get('screen');
   const [visible, setVisible] = useState(false);
-  const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('abcdefg');
+  const [email, setEmail] = useState('abcdefg');
   const [isLoading, setIsLoading] = useState(false);
+  const [userErr, setUserErr] = useState('');
+  const [errorr, setErrorr] = useState(false);
+  const [passErr, setPassErr] = useState('');
+
+  const [loginUser, {data, error, loading}] = useMutation(login_mutation, {
+    onCompleted: async (data) => {
+      console.log(data);
+      if (data.login.errors != null) {
+        console.log(data.login.errors);
+        data.login.errors.map((val, ind) => {
+          if (val.field == 'username') {
+            setUserErr(val.message);
+          }
+          if (val.field == 'password') {
+            setPassErr(val.message);
+          }
+        });
+      } else {
+        var user = data.login.user;
+        await props.setLoginUser(
+          email,
+          user.User,
+          user.role,
+          user.profile,
+          data.login.accessToken,
+          data.login.refreshToken,
+          data.id,
+          props.navigation,
+        );
+      }
+      setIsLoading(false);
+    },
+  });
 
   return (
     <LinearGradient
@@ -90,19 +153,28 @@ export default function SignInScreen(props) {
             hasIcon={true}
             customIcon={true}
             iconChild={<AntDesign name="user" color="black" size={30} />}
-            value={email}
+            textVal={email}
             inputHandler={(e) => {
               setEmail(e);
             }}
-            iconName="email"
             placeholder="Email Id or Username"
           />
+          {errorr == true && email == '' ? (
+            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+              <ErrorMessage msg={'Field should not be empty ! '} />
+            </View>
+          ) : null}
+          {userErr != '' ? (
+            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+              <ErrorMessage msg={`Username / Email ${userErr.toLowerCase()}`} />
+            </View>
+          ) : null}
           <TextInputCustom
             autoCompleteType="password"
             hasIcon={true}
             hasRightIcon={true}
             secureTextEntry={!visible}
-            value={password}
+            textVal={password}
             inputHandler={(pass) => {
               setPassword(pass);
             }}
@@ -124,6 +196,16 @@ export default function SignInScreen(props) {
               />
             }
           />
+          {errorr == true && password == '' ? (
+            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+              <ErrorMessage msg={'Field should not be empty ! '} />
+            </View>
+          ) : null}
+          {passErr != '' ? (
+            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+              <ErrorMessage msg={passErr} />
+            </View>
+          ) : null}
           {isLoading ? (
             <ActivityIndicator
               style={{
@@ -160,39 +242,61 @@ export default function SignInScreen(props) {
                 }}>
                 Forgot Password?
               </Text>
-              <Pressable
-                android_ripple={{
-                  color: '#000',
-                }}
-                disabled={props.isLoading}
-                onPress={async () => {
-                  if (email != '' && password != '') {
-                    // await this.props.setLoading(true);
-                    // await this.props.signInUser(email, password);
-                  }
-                }}
-                style={{
-                  width: '90%',
-                  bottom: 20,
-                  marginTop: 50,
-                  height: 45,
-                  backgroundColor: 'lightblue',
-                  elevation: 5,
-                  justifyContent: 'center',
-                }}>
-                <Text
-                  adjustsFontSizeToFit
-                  allowFontScaling
+              {isLoading ? (
+                <ActivityIndicator
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    textAlign: 'center',
-                    textAlignVertical: 'center',
-                    fontWeight: 'bold',
+                    alignSelf: 'center',
+                    width: '90%',
+                    bottom: 20,
+                    marginTop: 50,
+                    height: 45,
+                  }}
+                  color="black"
+                />
+              ) : (
+                <Pressable
+                  android_ripple={{
+                    color: '#0000010',
+                  }}
+                  onPress={() => {
+                    setIsLoading(true);
+                    if (email != '' && password != '') {
+                      loginUser({
+                        variables: {
+                          input: {
+                            usernameOrEmail: email,
+                            password: password,
+                          },
+                        },
+                      });
+                    } else {
+                      setErrorr(true);
+                      setIsLoading(false);
+                    }
+                  }}
+                  style={{
+                    width: '90%',
+                    bottom: 20,
+                    marginTop: 50,
+                    height: 45,
+                    backgroundColor: 'lightblue',
+                    elevation: 5,
+                    justifyContent: 'center',
                   }}>
-                  Sign In
-                </Text>
-              </Pressable>
+                  <Text
+                    adjustsFontSizeToFit
+                    allowFontScaling
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      textAlign: 'center',
+                      textAlignVertical: 'center',
+                      fontWeight: 'bold',
+                    }}>
+                    Sign In
+                  </Text>
+                </Pressable>
+              )}
               <Text
                 onPress={() => {
                   props.navigation.navigate('SignUp');
@@ -217,12 +321,11 @@ export default function SignInScreen(props) {
   );
 }
 
-// const mapStateToProps = (state) => {
-//   return {
-//     isLoading: state.details.isLoading,
-//   };
-// };
+const mapStateToProps = (state) => {
+  return {
+    profile: state.authRed.profile,
+    accessToken: state.authRed.accessToken,
+  };
+};
 
-// export default connect(mapStateToProps, {signInUser, checkLogin, setLoading})(
-//   SignInScreen,
-// );
+export default connect(mapStateToProps, {setLoginUser})(SignInScreen);

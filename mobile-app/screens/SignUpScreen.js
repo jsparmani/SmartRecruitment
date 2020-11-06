@@ -17,6 +17,9 @@ import {ScrollView} from 'react-native-gesture-handler';
 import TextInputCustom from '../Components/TextInputCustom';
 import {gql, useMutation} from '@apollo/client';
 import RadioButton from '../Components/RadioButton';
+import ErrorMessage from '../Components/ErrorMessage';
+import {setUser} from '../src/actions/dataAction';
+import {connect} from 'react-redux';
 
 const register_mutation = gql`
   mutation Register($input: RegisterInput!) {
@@ -25,39 +28,68 @@ const register_mutation = gql`
         email
         username
         role
+        id
         profile {
-          id
           name
+          age
+          gender
+          photo
+          resume
         }
       }
       errors {
         field
         message
       }
+      accessToken
+      refreshToken
     }
   }
 `;
-export default function SignUpScreen(props) {
+function SignUpScreen(props) {
   const {width, height} = Dimensions.get('screen');
   const [visible, setVisible] = useState(false);
-  const [password, setPassword] = useState('qwerty12345');
-  const [email, setEmail] = useState('qwerty12345@gmail.com');
+  const [password, setPassword] = useState('abcdefg');
+  const [email, setEmail] = useState('abcdefg@gmail.com');
   const [role, setRole] = useState('CANDIDATE');
-  const [username, setUsername] = useState('qwerty12345');
+  const [username, setUsername] = useState('abcdefg');
+  const [errorr, setErrorr] = useState(false);
+  const [notUnique, setnotUnique] = useState(false);
+  const [notUniqueMsg, setnotUniqueMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const [addUser, {data, error, loading}] = useMutation(register_mutation, {
-    onCompleted: (data) => {
-      console.log(data.register.token);
+    onCompleted: async (data) => {
+      if (data.register.errors != null) {
+        data.register.errors.map((val, ind) => {
+          if (val.field == 'username/email') {
+            setnotUnique(true);
+            setnotUniqueMsg(val.message);
+          }
+        });
+      } else {
+        const {profile, id} = data.register.user;
+        const {accessToken, refreshToken} = data;
+        console.log(data.register.user);
+        await props.setUser(
+          email,
+          username,
+          role,
+          profile,
+          id,
+          accessToken,
+          refreshToken,
+        );
+        props.navigation.navigate('Profile');
+      }
+      setIsLoading(false);
     },
   });
 
   return (
     <LinearGradient
       style={{flex: 1, alignItems: 'center'}}
-      // colors={['#2840c7', '#228bd6', '#24cde3']}
       colors={['#ffffff', '#ffffff']}>
-      {/* <StatusBar backgroundColor="#2840c7" /> */}
       <StatusBar backgroundColor="black" />
       <ScrollView
         style={{
@@ -71,7 +103,6 @@ export default function SignUpScreen(props) {
           style={{
             ...StyleSheet.absoluteFill,
             height: 250,
-            // backgroundColor: 'lightblue',
             borderBottomLeftRadius: 0,
             borderBottomRightRadius: width / 1,
           }}>
@@ -123,6 +154,16 @@ export default function SignUpScreen(props) {
             }}
             placeholder="Username"
           />
+          {errorr == true && username.length < 5 ? (
+            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+              <ErrorMessage msg={'Username must be atleast 5 characters'} />
+            </View>
+          ) : null}
+          {notUnique == true ? (
+            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+              <ErrorMessage msg={notUniqueMsg} />
+            </View>
+          ) : null}
           <TextInputCustom
             keyboardType="email-address"
             autoCompleteType="email"
@@ -161,6 +202,11 @@ export default function SignUpScreen(props) {
               />
             }
           />
+          {errorr == true && password.length <= 6 ? (
+            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+              <ErrorMessage msg={'Password length must be greater than 6'} />
+            </View>
+          ) : null}
           <View
             style={{
               width: '90%',
@@ -191,15 +237,7 @@ export default function SignUpScreen(props) {
               }}
             />
           </View>
-          {/* {error != undefined ? (
-            <Text>
-              Bad:
-              {error.graphQLErrors.map(({message}, i) => (
-                <Text key={i}>{message}</Text>
-              ))}
-            </Text>
-          ) : null} */}
-          {loading ? (
+          {isLoading ? (
             <ActivityIndicator
               style={{
                 alignSelf: 'center',
@@ -216,7 +254,14 @@ export default function SignUpScreen(props) {
                 color: '#0000010',
               }}
               onPress={() => {
-                if (email != '' && password != '' && username != '') {
+                setIsLoading(true);
+                if (
+                  email != '' &&
+                  password != '' &&
+                  username != '' &&
+                  username.length > 4 &&
+                  password.length >= 7
+                ) {
                   addUser({
                     variables: {
                       input: {
@@ -227,10 +272,9 @@ export default function SignUpScreen(props) {
                       },
                     },
                   });
+                } else {
+                  setErrorr(true);
                 }
-                // setInterval(() => {
-                //   console.log(loading, data, error);
-                // }, 2000);
               }}
               style={{
                 width: '90%',
@@ -274,9 +318,10 @@ export default function SignUpScreen(props) {
             Already Registered ? Click Here to{' '}
             <Text style={{color: 'darkblue'}}>Sign In.</Text>
           </Text>
-          {data ? <Text>{data.register.user.email}</Text> : null}
         </View>
       </ScrollView>
     </LinearGradient>
   );
 }
+
+export default connect(null, {setUser})(SignUpScreen);

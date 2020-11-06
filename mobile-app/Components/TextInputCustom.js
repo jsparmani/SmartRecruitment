@@ -2,26 +2,26 @@ import React from 'react';
 import {View, TextInput, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function TextInputCustom(props) {
-  const {
-    textVal,
-    inputHandler,
-    keyboardType = 'default', //email-address
-    autoCompleteType = 'username',
-    iconName = 'icon',
-    hasIcon = false,
-    hasRightIcon = false,
-    customIcon = false,
-    iconColor = '#3B3B3B',
-    iconChild,
-    righticonChild,
-    placeholder,
-    placeholderTextColor = '#00000090',
-    secureTextEntry = false,
-    inputStyle = {},
-  } = props;
+export default function TextInputCustom({
+  textVal,
+  inputHandler,
+  keyboardType = 'default', //email-address
+  autoCompleteType = 'username',
+  iconName = 'icon',
+  hasIcon = false,
+  hasRightIcon = false,
+  customIcon = false,
+  iconColor = '#3B3B3B',
+  iconChild,
+  righticonChild,
+  placeholder,
+  placeholderTextColor = '#00000090',
+  secureTextEntry = false,
+  inputStyle = {},
+  viewStyle = {},
+}) {
   return (
-    <View style={styles.viewStyle}>
+    <View style={[styles.viewStyle, viewStyle]}>
       {hasIcon ? (
         customIcon ? (
           <View style={{justifyContent: 'center'}}>{iconChild}</View>
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1.5,
     paddingLeft: 10,
-    marginTop: 20,
+    marginTop: 15,
     // backgroundColor: '#00000030',
   },
   inputStyle: {flex: 1, marginLeft: 15},

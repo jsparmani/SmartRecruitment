@@ -1,16 +1,24 @@
 import React, {Component} from 'react';
-import {View, Text} from 'react-native';
 import Index from './screens/Index';
 import {NavigationContainer} from '@react-navigation/native';
-import {ApolloClient, InMemoryCache, ApolloProvider} from '@apollo/client';
+import {Provider} from 'react-redux';
+import {PersistGate} from 'redux-persist/integration/react';
+import {applyMiddleware, createStore} from 'redux';
+import {persistStore, persistReducer} from 'redux-persist';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import rootReducer from './src/reducers/index';
+import thunk from 'redux-thunk';
+import {Provider as PaperProvider} from 'react-native-paper';
 
-// Initialize Apollo Client
-const client = new ApolloClient({
-  // uri: '192.168.137.1:5000/graphql',
-  uri: 'http://10.0.2.2:5000/graphql',
-  // uri: 'http://localhost:5000/graphql',
-  cache: new InMemoryCache(),
-});
+const persistConfig = {
+  key: 'root',
+  storage: AsyncStorage,
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+const store = createStore(persistedReducer, applyMiddleware(thunk));
+const persistor = persistStore(store);
 
 class App extends Component {
   constructor(props) {
@@ -20,13 +28,15 @@ class App extends Component {
 
   render() {
     return (
-      <View style={{flex: 1}}>
-        <ApolloProvider client={client}>
-          <NavigationContainer>
-            <Index />
-          </NavigationContainer>
-        </ApolloProvider>
-      </View>
+      <Provider store={store}>
+        <PersistGate persistor={persistor}>
+          <PaperProvider>
+            <NavigationContainer>
+              <Index />
+            </NavigationContainer>
+          </PaperProvider>
+        </PersistGate>
+      </Provider>
     );
   }
 }
