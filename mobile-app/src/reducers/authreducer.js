@@ -11,7 +11,7 @@ const Initial_State = {
 };
 
 export default (state = Initial_State, action) => {
-  console.log('in reducer ', action.profile);
+  console.log('in reducer ', action);
   switch (action.type) {
     case 'SET_USER':
       return {
@@ -36,10 +36,16 @@ export default (state = Initial_State, action) => {
         id: action.id,
         isSignedIn: action.isSignedIn,
       };
-    case 'GET_MEMBERS':
+    case 'UPDATE_PROFILE':
       return {
         ...state,
-        MemberList: action.list,
+        profile: action.profile,
+      };
+    case 'UPDATE_TOKEN':
+      return {
+        ...state,
+        accessToken: action.accessToken,
+        refreshToken: action.refreshToken,
       };
     case 'Loading':
       return {

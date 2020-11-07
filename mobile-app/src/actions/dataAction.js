@@ -18,17 +18,18 @@ export const setUser = (
     refreshToken: refreshToken,
   };
 };
+export const updateToken = (accessToken, refreshToken) => {
+  return {
+    type: 'UPDATE_TOKEN',
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+  };
+};
 
 export const UpdateProfile = (profile) => {
   return {
-    type: 'SET_USER',
-    new_email: new_email,
-    new_username: new_username,
-    new_role: new_role,
+    type: 'UPDATE_PROFILE',
     profile: profile,
-    id: id,
-    accessToken: accessToken,
-    refreshToken: refreshToken,
   };
 };
 
@@ -53,8 +54,8 @@ export const setLoginUser = (
       new_role: new_role,
       profile: profile,
       accessToken: accessToken,
-      id: id,
       refreshToken: refreshToken,
+      id: id,
     };
   } else {
     return {

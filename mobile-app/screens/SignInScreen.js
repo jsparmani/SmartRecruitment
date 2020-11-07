@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
-  TextInput,
+  ToastAndroid,
   StatusBar,
   Image,
   Pressable,
@@ -72,6 +72,7 @@ function SignInScreen(props) {
         });
       } else {
         var user = data.login.user;
+        setIsLoading(false);
         await props.setLoginUser(
           email,
           user.User,
@@ -83,7 +84,11 @@ function SignInScreen(props) {
           props.navigation,
         );
       }
+    },
+    onError: (err) => {
       setIsLoading(false);
+      console.log(err.message);
+      ToastAndroid.show(err.message, ToastAndroid.SHORT);
     },
   });
 
