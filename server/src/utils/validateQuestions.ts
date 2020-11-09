@@ -3,6 +3,8 @@ import { QuestionsInput } from './../resolvers/inputs/QuestionsInput';
 export const validateQuestions = (options: QuestionsInput) => {
   const { questions } = options;
 
+  //FIXME: Below validations don't work properly
+
   questions.forEach((question): any => {
     if (question == '') {
       return [

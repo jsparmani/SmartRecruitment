@@ -7,4 +7,7 @@ export class JobInput {
 
   @Field()
   description: string;
+
+  @Field(() => [String])
+  requirements: string[];
 }

@@ -1,7 +1,7 @@
 import { JobInput } from './../resolvers/inputs/JobInput';
 
 export const validateJob = (options: JobInput) => {
-  const { title, description } = options;
+  const { title, description, requirements } = options;
 
   if (!title) {
     return [{ field: 'title', message: 'Title cannot be empty' }];
@@ -15,6 +15,28 @@ export const validateJob = (options: JobInput) => {
       },
     ];
   }
+
+  //FIXME: Below validations don't work properly
+
+  requirements.forEach((req): any => {
+    if (req === '') {
+      return [
+        {
+          field: 'requirements',
+          message: 'Requirements cannot be empty',
+        },
+      ];
+    }
+
+    if (req.includes(',')) {
+      return [
+        {
+          field: 'requirements',
+          message: 'Requirements cannot have a , in between',
+        },
+      ];
+    }
+  });
 
   return null;
 };

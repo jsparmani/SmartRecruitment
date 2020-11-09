@@ -33,6 +33,8 @@ class JobResponse {
   errors?: FieldError[];
 }
 
+// TODO: Setup access rights such that some info can only be viewed by company users authorised to do so for the jobs only made by them
+
 @Resolver()
 export class JobResolver {
   @UseMiddleware(isAuth)
@@ -61,7 +63,7 @@ export class JobResolver {
       };
     }
 
-    const { title, description } = input;
+    const { title, description, requirements } = input;
 
     const errors = validateJob(input);
     if (errors) {
@@ -96,6 +98,7 @@ export class JobResolver {
       title,
       description,
       company,
+      requirements,
     }).save();
 
     return {

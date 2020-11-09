@@ -28,6 +28,10 @@ export class Job extends BaseEntity {
   @Column()
   description: string;
 
+  @Field(() => [String])
+  @Column('simple-array', { default: '' })
+  requirements: string[];
+
   @Field(() => Company)
   @ManyToOne(() => Company, (company) => company.jobs)
   company: Company;
