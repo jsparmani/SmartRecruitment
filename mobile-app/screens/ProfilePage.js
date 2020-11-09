@@ -24,6 +24,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {StackActions} from '@react-navigation/native';
 import {gql, useMutation} from '@apollo/client';
 import {connect} from 'react-redux';
+import {UpdateProfile} from '../src/actions/dataAction';
 
 const {width, height} = Dimensions.get('screen');
 
@@ -31,8 +32,6 @@ function backButtonHandler() {
   ToastAndroid.show('First Complete Profile', ToastAndroid.SHORT);
   return true;
 }
-BackHandler.addEventListener('hardwareBackPress', backButtonHandler);
-BackHandler.removeEventListener('hardwareBackPress', backButtonHandler);
 
 const profile_mutation = gql`
   mutation CreateUpdateProfile($input: ProfileInput!) {
@@ -85,29 +84,28 @@ function ProfilePage(props) {
           //       setAgeError(val.message);
         } else {
           const {profile} = data.createOrUpdateProfile.profile;
-          //   // const {accessToken, refreshToken} = data;
-          //   console.log(data);
-          //   // await props.setUser(
-          //   //   email,
-          //   //   username,
-          //   //   role,
-          //   //   profile,
-          //   //   accessToken,
-          //   //   refreshToken,
-          //   // );
-          //   // props.navigation.navigate('Profile');
+
+          await props.UpdateProfile(profile);
         }
         setIsLoading(false);
+      },
+      onError: (err) => {
+        console.log(err);
       },
     },
   );
 
   useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', backButtonHandler);
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backButtonHandler,
+    );
 
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backButtonHandler);
-    };
+    return () => backHandler.remove();
+
+    // return () => {
+    //   BackHandler.removeEventListener('hardwareBackPress', backButtonHandler);
+    // };
   }, []);
 
   const UploadFile = async () => {
@@ -548,7 +546,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, {})(ProfilePage);
+export default connect(mapStateToProps, {UpdateProfile})(ProfilePage);
 
 const styles = StyleSheet.create({
   imgStyle: {
