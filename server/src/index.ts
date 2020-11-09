@@ -10,9 +10,39 @@ import { ApolloServer } from 'apollo-server-express';
 import { buildSchema } from 'type-graphql';
 import { UserResolver } from './resolvers/user';
 import { createConnection } from 'typeorm';
+import { verify } from 'jsonwebtoken';
+import { User } from './entity/User';
+import { createAccessToken } from './utils/auth';
 
 (async () => {
   const app = express();
+
+  app.post('/refresh_token', async (req, res) => {
+    const token = req.headers.refreshtoken as string;
+    console.log(token);
+    if (!token) {
+      return res.send({ ok: false, accessToken: '' });
+    }
+    let payload: any;
+    try {
+      payload = verify(token, process.env.REFRESH_TOKEN_SECRET!);
+    } catch (err) {
+      console.log(err);
+      return res.send({ ok: false, accessToken: '' });
+    }
+
+    let user = await User.findOne(payload.userId);
+
+    if (!user) {
+      return res.send({ ok: false, accessToken: '' });
+    }
+
+    if (user.tokenVersion !== payload.tokenVersion) {
+      return res.send({ ok: false, accessToken: '' });
+    }
+
+    return res.send({ ok: true, accessToken: createAccessToken(user) });
+  });
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({

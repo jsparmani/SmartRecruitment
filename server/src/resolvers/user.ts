@@ -1,4 +1,3 @@
-import { verify } from 'jsonwebtoken';
 import { User } from './../entity/User';
 import { isAdmin } from './../middleware/isAdmin';
 import { compare, hash } from 'bcryptjs';
@@ -149,7 +148,7 @@ export class UserResolver {
     };
   }
 
-  @Mutation(() => AuthResponse)
+  /* @Mutation(() => AuthResponse)
   async refreshMyToken(
     @Arg('refreshToken') token: string,
   ): Promise<AuthResponse> {
@@ -207,7 +206,7 @@ export class UserResolver {
       accessToken: createAccessToken(user),
       refreshToken: createRefreshToken(user),
     };
-  }
+  } */
 
   @UseMiddleware(isAdmin)
   @Mutation(() => Boolean)
