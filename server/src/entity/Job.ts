@@ -1,3 +1,4 @@
+import { Department } from './../types/departmentTypes';
 import { User } from './User';
 import { Company } from './Company';
 import { Field, Int, ObjectType } from 'type-graphql';
@@ -35,6 +36,14 @@ export class Job extends BaseEntity {
   @Field(() => Company)
   @ManyToOne(() => Company, (company) => company.jobs)
   company: Company;
+
+  @Field(() => Department)
+  @Column({
+    type: 'enum',
+    enum: Department,
+    default: Department.OTHERS,
+  })
+  department: Department;
 
   @Field(() => [User], { nullable: true })
   @ManyToMany(() => User, (user) => user.appliedJobs)

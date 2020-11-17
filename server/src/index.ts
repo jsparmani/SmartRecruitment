@@ -1,5 +1,5 @@
-import { ResponseResolver } from './resolvers/response';
 import 'reflect-metadata';
+import { ResponseResolver } from './resolvers/response';
 import { JobResolver } from './resolvers/job';
 import { __prod__ } from './constants';
 import { CompanyResolver } from './resolvers/company';

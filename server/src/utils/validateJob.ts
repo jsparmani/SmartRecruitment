@@ -1,7 +1,7 @@
 import { JobInput } from './../resolvers/inputs/JobInput';
 
 export const validateJob = (options: JobInput) => {
-  const { title, description, requirements } = options;
+  const { title, description, requirements, department } = options;
 
   if (!title) {
     return [{ field: 'title', message: 'Title cannot be empty' }];
@@ -12,6 +12,15 @@ export const validateJob = (options: JobInput) => {
       {
         field: 'description',
         message: 'Description cannot be empty',
+      },
+    ];
+  }
+
+  if (!department) {
+    return [
+      {
+        field: 'department',
+        message: 'Department cannot be empty',
       },
     ];
   }

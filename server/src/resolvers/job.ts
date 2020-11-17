@@ -63,7 +63,7 @@ export class JobResolver {
       };
     }
 
-    const { title, description, requirements } = input;
+    const { title, description, requirements, department } = input;
 
     const errors = validateJob(input);
     if (errors) {
@@ -99,6 +99,7 @@ export class JobResolver {
       description,
       company,
       requirements,
+      department,
     }).save();
 
     return {
