@@ -1,3 +1,4 @@
+import { Company } from './../entity/Company';
 import { validateProfile } from './../utils/validateProfile';
 import { ProfileInput } from './inputs/ProfileInput';
 import { Profile } from './../entity/Profile';
@@ -26,11 +27,20 @@ class ProfileResponse {
   profile?: Profile;
 }
 
+@ObjectType()
+class MeResponse {
+  @Field(() => User)
+  user: User;
+
+  @Field(() => Company, { nullable: true })
+  company?: Company;
+}
+
 @Resolver()
 export class ProfileResolver {
   @UseMiddleware(isAuth)
-  @Query(() => User, { nullable: true })
-  async me(@Ctx() { payload }: MyContext): Promise<User | undefined> {
+  @Query(() => MeResponse, { nullable: true })
+  async me(@Ctx() { payload }: MyContext): Promise<MeResponse | undefined> {
     if (!payload?.userId) {
       throw new Error('Invalid User');
     }
@@ -38,11 +48,24 @@ export class ProfileResolver {
     let user = await User.findOne(parseInt(payload.userId), {
       relations: ['profile', 'appliedJobs'],
     });
+
     if (!user) {
       throw new Error('User does not exist!');
     }
 
-    return user;
+    if (user.role === 'company') {
+      let company = await Company.findOne({
+        where: { admin: user },
+        relations: ['jobs'],
+      });
+      return {
+        user,
+        company,
+      };
+    }
+    return {
+      user,
+    };
   }
 
   @UseMiddleware(isAuth)
