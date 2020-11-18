@@ -1,21 +1,33 @@
 import React from 'react';
-import {View, Text} from 'react-native';
+import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
+import {connect} from 'react-redux';
+import {LogOut} from '../src/actions/dataAction';
 
-export default function SettingScreen() {
+function SettingScreen(props) {
   return (
     <View>
-      <Text>SettingScreen</Text>
+      <TouchableOpacity
+        style={styles.btnStyle}
+        onPress={() => {
+          props.LogOut();
+        }}>
+        <Text>LOG-OUT</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
-// import React from 'react';
-// import {Text, View} from 'react-native';
+export default connect(null, {LogOut})(SettingScreen);
 
-// const SettingsScreen = (props) => (
-//   <View>
-//     <Text>SettingsScreen</Text>
-//   </View>
-// );
-
-// export default SettingsScreen;
+const styles = StyleSheet.create({
+  btnStyle: {
+    marginTop: 50,
+    width: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    alignSelf: 'center',
+    borderRadius: 10,
+    backgroundColor: '#ADD8E6',
+  },
+});

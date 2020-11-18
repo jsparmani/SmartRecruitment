@@ -20,6 +20,7 @@ import RadioButton from '../Components/RadioButton';
 import ErrorMessage from '../Components/ErrorMessage';
 import {setUser} from '../src/actions/dataAction';
 import {connect} from 'react-redux';
+import * as Animatable from 'react-native-animatable';
 
 const register_mutation = gql`
   mutation Register($input: RegisterInput!) {
@@ -49,10 +50,15 @@ const register_mutation = gql`
 function SignUpScreen(props) {
   const {width, height} = Dimensions.get('screen');
   const [visible, setVisible] = useState(false);
-  const [password, setPassword] = useState('abcdefg');
-  const [email, setEmail] = useState('abcdefg@gmail.com');
-  const [role, setRole] = useState('CANDIDATE');
-  const [username, setUsername] = useState('abcdefg');
+  const [password, setPassword] = useState('abcdefghk');
+  const [email, setEmail] = useState('abcdefghk@gmail.com');
+  const [role, setRole] = useState('COMPANY');
+  const [username, setUsername] = useState('abcdefghk');
+  // const [password, setPassword] = useState('abcdefg');
+  // const [email, setEmail] = useState('abcdefg@gmail.com');
+  // const [role, setRole] = useState('CANDIDATE');
+  // const [username, setUsername] = useState('abcdefg');
+  const [location, setlocation] = useState('');
   const [errorr, setErrorr] = useState(false);
   const [notUnique, setnotUnique] = useState(false);
   const [notUniqueMsg, setnotUniqueMsg] = useState('');
@@ -69,7 +75,7 @@ function SignUpScreen(props) {
         });
       } else {
         const {profile, id} = data.register.user;
-        const {accessToken, refreshToken} = data;
+        const {accessToken, refreshToken} = data.register;
         console.log(data.register.user);
         await props.setUser(
           email,
@@ -80,7 +86,10 @@ function SignUpScreen(props) {
           accessToken,
           refreshToken,
         );
-        props.navigation.navigate('Profile');
+
+        role == 'CANDIDATE'
+          ? props.navigation.navigate('Profile')
+          : props.navigation.navigate('JobProfile');
       }
       setIsLoading(false);
     },
@@ -143,70 +152,72 @@ function SignUpScreen(props) {
             }}>
             AI RECRUITER
           </Text>
-          <TextInputCustom
-            autoCompleteType="username"
-            hasIcon={true}
-            customIcon={true}
-            iconChild={<AntDesign name="user" color="black" size={30} />}
-            textVal={username}
-            inputHandler={(name) => {
-              setUsername(name);
-            }}
-            placeholder="Username"
-          />
-          {errorr == true && username.length < 5 ? (
-            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
-              <ErrorMessage msg={'Username must be atleast 5 characters'} />
-            </View>
-          ) : null}
-          {notUnique == true ? (
-            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
-              <ErrorMessage msg={notUniqueMsg} />
-            </View>
-          ) : null}
-          <TextInputCustom
-            keyboardType="email-address"
-            autoCompleteType="email"
-            hasIcon={true}
-            textVal={email}
-            inputHandler={(e) => {
-              setEmail(e);
-            }}
-            iconName="email"
-            placeholder="Email Id"
-          />
-          <TextInputCustom
-            autoCompleteType="password"
-            hasIcon={true}
-            hasRightIcon={true}
-            secureTextEntry={!visible}
-            textVal={password}
-            inputHandler={(pass) => {
-              setPassword(pass);
-            }}
-            iconName="lock"
-            placeholder="Password"
-            righticonChild={
-              <Entypo
-                name={visible ? 'eye-with-line' : 'eye'}
-                color="black"
-                onPress={() => {
-                  setVisible(!visible);
-                }}
-                size={25}
-                style={{
-                  marginLeft: -50,
-                  marginTop: 'auto',
-                  marginBottom: 'auto',
-                }}
-              />
-            }
-          />
-          {errorr == true && password.length <= 6 ? (
-            <View style={{flex: 1, marginTop: 8, width: '100%'}}>
-              <ErrorMessage msg={'Password length must be greater than 6'} />
-            </View>
-          ) : null}
+          <Animatable.View animation="zoomInUp">
+            <TextInputCustom
+              autoCompleteType="username"
+              hasIcon={true}
+              customIcon={true}
+              iconChild={<AntDesign name="user" color="black" size={30} />}
+              textVal={username}
+              inputHandler={(name) => {
+                setUsername(name);
+              }}
+              placeholder="Username"
+            />
+            {errorr == true && username.length < 5 ? (
+              <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+                <ErrorMessage msg={'Username must be atleast 5 characters'} />
+              </View>
+            ) : null}
+            {notUnique == true ? (
+              <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+                <ErrorMessage msg={notUniqueMsg} />
+              </View>
+            ) : null}
+            <TextInputCustom
+              keyboardType="email-address"
+              autoCompleteType="email"
+              hasIcon={true}
+              textVal={email}
+              inputHandler={(e) => {
+                setEmail(e);
+              }}
+              iconName="email"
+              placeholder="Email Id"
+            />
+            <TextInputCustom
+              autoCompleteType="password"
+              hasIcon={true}
+              hasRightIcon={true}
+              secureTextEntry={!visible}
+              textVal={password}
+              inputHandler={(pass) => {
+                setPassword(pass);
+              }}
+              iconName="lock"
+              placeholder="Password"
+              righticonChild={
+                <Entypo
+                  name={visible ? 'eye-with-line' : 'eye'}
+                  color="black"
+                  onPress={() => {
+                    setVisible(!visible);
+                  }}
+                  size={25}
+                  style={{
+                    marginLeft: -50,
+                    marginTop: 'auto',
+                    marginBottom: 'auto',
+                  }}
+                />
+              }
+            />
+            {errorr == true && password.length <= 6 ? (
+              <View style={{flex: 1, marginTop: 8, width: '100%'}}>
+                <ErrorMessage msg={'Password length must be greater than 6'} />
+              </View>
+            ) : null}
+          </Animatable.View>
           <View
             style={{
               width: '90%',

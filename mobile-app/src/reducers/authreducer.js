@@ -7,6 +7,8 @@ const Initial_State = {
   email: '',
   role: '',
   profile: null,
+  companyLocation: null,
+  companyName: null,
   id: null,
 };
 
@@ -41,11 +43,18 @@ export default (state = Initial_State, action) => {
         ...state,
         profile: action.profile,
       };
+    case 'UPDATE_JOB_PROFILE':
+      return {
+        ...state,
+        profile: action.profile,
+        companyName: action.companyName,
+        companyLocation: action.companyLocation,
+      };
     case 'UPDATE_TOKEN':
       return {
         ...state,
         accessToken: action.accessToken,
-        refreshToken: action.refreshToken,
+        // refreshToken: action.refreshToken,
       };
     case 'Loading':
       return {
@@ -64,11 +73,15 @@ export default (state = Initial_State, action) => {
       };
     case 'Log_Out':
       return {
-        MedList: null,
-        MemberList: null,
-        isSignedIn: 1,
-        uid: '',
+        isSignedIn: 0,
+        isLoading: false,
+        refreshToken: '',
+        accessToken: '',
         username: '',
+        email: '',
+        role: '',
+        profile: null,
+        id: null,
       };
 
     default:

@@ -48,10 +48,14 @@ const login_mutation = gql`
 `;
 
 function SignInScreen(props) {
+  console.log(props.accessToken);
+
   const {width, height} = Dimensions.get('screen');
   const [visible, setVisible] = useState(false);
-  const [password, setPassword] = useState('abcdefg');
-  const [email, setEmail] = useState('abcdefg');
+  const [password, setPassword] = useState('abcdefghk');
+  const [email, setEmail] = useState('abcdefghk');
+  // const [password, setPassword] = useState('abcdefg');
+  // const [email, setEmail] = useState('abcdefg');
   const [isLoading, setIsLoading] = useState(false);
   const [userErr, setUserErr] = useState('');
   const [errorr, setErrorr] = useState(false);
