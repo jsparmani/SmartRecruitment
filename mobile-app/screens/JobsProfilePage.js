@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Dimensions,
   PermissionsAndroid,
-  Platform,
+  FlatList,
   Alert,
   ToastAndroid,
   BackHandler,
@@ -17,18 +17,19 @@ import {
 import TextInputCustom from '../Components/TextInputCustom';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DocumentPicker from 'react-native-document-picker';
-import RNFetchBlob from 'rn-fetch-blob';
 import ImagePicker from 'react-native-image-picker';
 import ErrorMessage from '../Components/ErrorMessage';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {StackActions} from '@react-navigation/native';
 import {gql, useMutation} from '@apollo/client';
 import {connect} from 'react-redux';
-import {UpdateProfile, updateToken} from '../src/actions/dataAction';
+import {UpdateJobProfile, updateToken} from '../src/actions/dataAction';
 import AnimatedLoader from './AnimatedLoader';
-import * as Animatable from 'react-native-animatable';
-
-const {width, height} = Dimensions.get('screen');
+import axios from 'axios';
+import qs from 'qs';
+import Entypo from 'react-native-vector-icons/Entypo';
+import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
+// import Geolocation from '@react-native-community/geolocation';
 
 function backButtonHandler() {
   ToastAndroid.show('First Complete Profile', ToastAndroid.SHORT);
@@ -53,7 +54,25 @@ const profile_mutation = gql`
   }
 `;
 
-function ProfilePage(props) {
+const company_mutation = gql`
+  mutation RegisterCompany($input: CompanyInput!) {
+    registerCompany(input: $input) {
+      company {
+        name
+        admin {
+          username
+        }
+        location
+      }
+      errors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+function JobsProfilePage(props) {
   // const [frstName, setFrstName] = useState('');
   // const [lastName, setLastName] = useState('');
   // const [age, setAge] = useState(null);
@@ -69,57 +88,164 @@ function ProfilePage(props) {
   const [gender, setGender] = useState('MALE');
   const [fileData, setfileData] = useState(null);
   const [image, setImage] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [ImageUrl, setImageUrl] = useState('');
   const [FileUrl, setFileUrl] = useState('');
   const [error, setError] = useState(false);
   const [orientation, setOrientation] = useState('Portrait');
-  // const [isLoading, setIsLoading] = useState(false);
   const [ageError, setAgeError] = useState('');
-  // const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [profileUpdate, {dataa, errorr, loading}] = useMutation(
+  const [CompanyName, setCompanyName] = useState('Telegram Inc.');
+  const [Location, setLocation] = useState('');
+  //   const [Location, setLocation] = useState('Mumbai , India');
+  const [locToken, setLocToken] = useState('');
+  const [Searches, setSearches] = useState(null);
+  const [ProfileData, setProfileData] = useState(false);
+  const [curLoc, setcurLoc] = useState('');
+
+  const [companyDetails, {dataa, errorr, loading}] = useMutation(
+    company_mutation,
+    {
+      onCompleted: async (data) => {
+        console.log(data.registerCompany);
+        if (data.registerCompany.errors != null) {
+          console.log(data.registerCompany.errors);
+          setIsLoading(false);
+        } else {
+          const {company} = data.registerCompany;
+          setIsLoading(false);
+          await props.UpdateJobProfile(ProfileData, company);
+        }
+      },
+      onError: async (err) => {
+        console.log(err);
+        setIsLoading(false);
+      },
+    },
+  );
+  const [profileUpdate, {data2, error2, loading2}] = useMutation(
     profile_mutation,
     {
       onCompleted: async (data) => {
         console.log(data);
         if (data.createOrUpdateProfile.errors != null) {
           console.log(data.createOrUpdateProfile.errors);
-          //   data.register.errors.map((val, ind) => {
-          //     if (val.field == 'age') {
-          //       setAgeError(val.message);
           setIsLoading(false);
         } else {
           const {profile} = data.createOrUpdateProfile;
-
-          await props.UpdateProfile(profile);
-          setIsLoading(false);
+          uploadCompanyDetails();
+          setProfileData(profile);
         }
-        setIsLoading(false);
       },
       onError: async (err) => {
         console.log(err);
         if (err.message == 'Not authenticated') {
           await props.updateToken(props.refreshToken);
-          uploadProfile();
           setIsLoading(false);
+          uploadProfile();
         }
         setIsLoading(false);
       },
     },
   );
 
+  const requestLocationPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'A.I. Recruiter',
+          message: 'This App access to your location ',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        // console.log('You can use the location');
+        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+          interval: 10000,
+          fastInterval: 5000,
+        })
+          .then((data) => {
+            console.log('In enabler ', data);
+            // Geolocation.getCurrentPosition(
+            //   //Will give you the current location
+            //   (position) => {
+            //     //getting the Longitude from the location json
+            //     const currentLongitude = JSON.stringify(
+            //       position.coords.longitude,
+            //     );
+
+            //     //getting the Latitude from the location json
+            //     const currentLatitude = JSON.stringify(
+            //       position.coords.latitude,
+            //     );
+            //     console.log(`${currentLatitude},${currentLongitude}`);
+            //     setcurLoc(`${currentLatitude},${currentLongitude}`);
+            //   },
+            //   (err2) => alert(err2.message),
+            //   {
+            //     enableHighAccuracy: true,
+            //     timeout: 20000000000000,
+            //     maximumAge: 200000000,
+            //   },
+            // );
+            //   GetLocation.getCurrentPosition({
+            //     enableHighAccuracy: false,
+            //     timeout: 15000,
+            //   })
+            //     .then((location) => {
+            //       console.log(location);
+            //     })
+            //     .catch((error) => {
+            //       const {code, message} = error;
+            //       console.warn(code, message);
+            //     });
+          })
+          .catch((err) => {
+            console.log(err);
+            this.requestLocationPermission();
+          });
+      } else {
+        console.log('location permission denied');
+        alert('Location permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backButtonHandler,
     );
+    requestLocationPermission();
 
+    var data = qs.stringify({
+      grant_type: 'client_credentials',
+      client_id:
+        'l5IKLsoGiTws7Jvnb0i0pkKX8QXqZK4VeGQ7ZTeTrQyv9YkVpie6OkwAQk3dATEAKWUjgGCrQcjwIaV_qy7tDg==',
+      client_secret:
+        'QJcH6ymTGazCmXuyNR8G28x1SZoCHFliH_GImWPMKdGxVPofw0C3CiSnXbsH83aglqlAsQu4G-8y8c2lIiMk76GJBC57cKCp',
+    });
+    var config = {
+      method: 'post',
+      url: 'https://outpost.mapmyindia.com/api/security/oauth/token',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      data: data,
+    };
+    axios(config)
+      .then((response) => {
+        console.log(response.data);
+        setLocToken(
+          `${response.data.token_type} ${response.data.access_token}`,
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     return () => backHandler.remove();
-
-    // return () => {
-    //   BackHandler.removeEventListener('hardwareBackPress', backButtonHandler);
-    // };
   }, []);
 
   const UploadFile = async () => {
@@ -139,49 +265,6 @@ function ProfilePage(props) {
       } else {
         throw err;
       }
-    }
-  };
-
-  const downloadSample = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        {
-          title: 'Access Storage',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        const {config, fs} = RNFetchBlob;
-        let PictureDir =
-          Platform.OS == 'android' ? fs.dirs.DownloadDir : fs.dirs.DocumentDir; // this is the pictures directory. You can check the available directories in the wiki.
-        let options = {
-          fileCache: true,
-          addAndroidDownloads: {
-            useDownloadManager: true, // setting it to true will use the device's native download manager and will be shown in the notification bar.
-            notification: true,
-            path: PictureDir + '/Sample_Resume.pdf', // this is the path where your downloaded file will live in
-            description: 'Downloading Sample resume.',
-          },
-        };
-        config(options)
-          .fetch(
-            'GET',
-            // 'https://www.coolfreecv.com/doc/coolfreecv_resume_en_06_n.docx',
-            'https://res.cloudinary.com/ai-recruitment/image/upload/v1604378216/jakes-resume_na7ngk.pdf',
-          )
-          .then((res) => {
-            console.log('downloaded');
-            ToastAndroid.show('Sample resume downloaded', ToastAndroid.SHORT);
-          });
-      } else {
-        console.log('Camera permission denied');
-      }
-    } catch (err) {
-      ToastAndroid.show('Sample Error Occurred !', ToastAndroid.SHORT);
-      console.warn(err);
     }
   };
 
@@ -221,12 +304,12 @@ function ProfilePage(props) {
 
     const data = new FormData();
     data.append('file', img);
-    data.append('upload_preset', 'user_profile');
+    data.append('upload_preset', 'Company_Logo');
     data.append('cloud_name', 'ai-recruitment');
-    const data2 = new FormData();
-    data2.append('file', resume);
-    data2.append('upload_preset', 'user_resume');
-    data2.append('cloud_name', 'ai-recruitment');
+    const data_form = new FormData();
+    data_form.append('file', resume);
+    data_form.append('upload_preset', 'Company_Brouchers');
+    data_form.append('cloud_name', 'ai-recruitment');
 
     fetch('https://api.cloudinary.com/v1_1/ai-recruitment/image/upload', {
       method: 'post',
@@ -240,11 +323,11 @@ function ProfilePage(props) {
         var photo = image;
         photo.uri = val.secure_url;
         setImage(photo);
-        console.log('added', ' ', val);
+        console.log('added', ' ', val.secure_url);
         setImageUrl(val.secure_url);
         fetch('https://api.cloudinary.com/v1_1/ai-recruitment/image/upload', {
           method: 'post',
-          body: data2,
+          body: data_form,
         })
           .then((res2) => res2.json())
           .then((val2) => {
@@ -261,7 +344,35 @@ function ProfilePage(props) {
       });
   };
 
+  const locSearch = (txt) => {
+    var query = txt.split(' ').join('+');
+    var url =
+      curLoc == ''
+        ? `https://atlas.mapmyindia.com/api/places/search/json?query=${query}`
+        : `https://atlas.mapmyindia.com/api/places/search/json?query=${query},location=${curLoc}`;
+    axios
+      .get(url, {
+        headers: {
+          Authorization: locToken,
+        },
+      })
+      .then((res) => {
+        setSearches(res.data.suggestedLocations);
+        // console.log(res.data.suggestedLocations);
+      })
+      .catch((err) => {
+        console.log('error', err);
+      });
+  };
+
   const uploadProfile = () => {
+    console.log({
+      name: `${frstName} ${lastName}`,
+      age: parseInt(age, 10),
+      gender: gender,
+      photo: ImageUrl,
+      resume: FileUrl,
+    });
     profileUpdate({
       variables: {
         input: {
@@ -270,6 +381,17 @@ function ProfilePage(props) {
           gender: gender,
           photo: ImageUrl,
           resume: FileUrl,
+        },
+      },
+    });
+  };
+
+  const uploadCompanyDetails = () => {
+    companyDetails({
+      variables: {
+        input: {
+          name: CompanyName,
+          location: Location,
         },
       },
     });
@@ -295,7 +417,7 @@ function ProfilePage(props) {
   return (
     <KeyboardAwareScrollView
       enableOnAndroid={true}
-      scrollEnabled={orientation == 'Portrait' ? false : true}
+      // scrollEnabled={orientation == 'Portrait' ? false : true}
       enableResetScrollToCoords={true}
       enableAutomaticScroll={true}
       resetScrollToCoords={{x: -100, y: -100}}
@@ -329,15 +451,13 @@ function ProfilePage(props) {
             position: 'absolute',
             zIndex: 0,
           }}>
-          Profile
+          Job Profile
         </Text>
       </View>
       <View
         style={{
           flex: 1,
           backgroundColor: '#fff',
-          // borderTopLeftRadius: 40,
-          // borderTopRightRadius: 40,
           borderRadius: 20,
           marginTop: 90,
           paddingBottom: 50,
@@ -373,15 +493,12 @@ function ProfilePage(props) {
                   textAlign: 'center',
                   textAlignVertical: 'center',
                 }}>
-                Click{'\n'}To{'\n'}Upload
+                Company{'\n'}Logo
               </Text>
             </View>
           ) : (
             <Image
-              source={
-                // {uri: 'data:image/jpeg;base64,' + image.data}
-                {uri: image.uri}
-              }
+              source={{uri: image.uri}}
               style={{
                 width: '100%',
                 height: '100%',
@@ -411,11 +528,112 @@ function ProfilePage(props) {
               <ErrorMessage msg={'Please Upload Profile Pic'} />
             </View>
           ) : null}
+          <TextInputCustom
+            hasIcon={true}
+            iconName="office-building"
+            textVal={CompanyName}
+            inputHandler={(txt) => {
+              setCompanyName(txt);
+            }}
+            placeholder="FIRST NAME"
+            viewStyle={{paddingLeft: 0, width: '85%', alignSelf: 'center'}}
+            inputStyle={{fontSize: 16, marginLeft: 5}}
+          />
+          {error == true && CompanyName == '' ? (
+            <View style={{flex: 1, marginTop: 2}}>
+              <ErrorMessage msg={'Enter Full Name'} />
+            </View>
+          ) : null}
+          <View>
+            <TextInputCustom
+              hasIcon={true}
+              customIcon={true}
+              iconChild={<Entypo name="location-pin" size={25} color="red" />}
+              textVal={Location}
+              inputHandler={(txt) => {
+                setLocation(txt);
+                locSearch(txt);
+              }}
+              placeholder="Location"
+              viewStyle={{
+                paddingLeft: 0,
+                width: '85%',
+                borderColor: '#3B3B3B',
+                alignSelf: 'center',
+              }}
+              inputStyle={{fontSize: 16, marginLeft: 5}}
+            />
+            {error == true && Location == '' ? (
+              <View style={{flex: 1, marginTop: 2}}>
+                <ErrorMessage msg={'Please Provide Location'} />
+              </View>
+            ) : null}
+          </View>
+          {Searches != null || Searches != [] ? (
+            <FlatList
+              data={Searches}
+              style={{
+                height: 'auto',
+                maxHeight: 200,
+                width: '85%',
+                alignSelf: 'center',
+                marginTop: 5,
+                paddingBottom: 5,
+              }}
+              // ListEmptyComponent={null}
+              renderItem={({item, ind}) => {
+                console.log(item);
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setLocation(item.placeAddress);
+                      setSearches(null);
+                    }}
+                    style={{
+                      height: 'auto',
+                      maxHeight: 80,
+                      marginVertical: 5,
+                      backgroundColor: '#51515120',
+                      paddingLeft: 10,
+                      paddingVertical: 5,
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      borderRadius: 15,
+                    }}>
+                    {/* <Text
+                      style={{fontSize: 15, width: '100%', fontWeight: 'bold'}}>
+                      {item.placeName}
+                    </Text> */}
+                    <Text
+                      style={{
+                        fontSize: 15,
+                        width: '10%',
+                        fontWeight: 'bold',
+                        height: '100%',
+                        textAlignVertical: 'center',
+                      }}>
+                      📌
+                    </Text>
+                    <Text
+                      style={{
+                        width: '90%',
+                        height: '100%',
+                        color: 'black',
+                        fontSize: 13,
+                        marginTop: 5,
+                        fontWeight: 'bold',
+                      }}>
+                      {item.placeAddress}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          ) : null}
           <View
             style={{
               flexDirection: 'row',
               justifyContent: 'space-evenly',
-              marginTop: 20,
             }}>
             <TextInputCustom
               textVal={frstName}
@@ -446,45 +664,65 @@ function ProfilePage(props) {
               <ErrorMessage msg={'Enter Full Name'} />
             </View>
           ) : null}
-          <TextInputCustom
-            textVal={age}
-            autoCompleteType="off"
-            inputHandler={(txt) => {
-              setAge(txt);
-            }}
-            placeholder="AGE"
-            keyboardType="number-pad"
-            viewStyle={{
-              paddingLeft: 0,
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
               width: '85%',
-              borderColor: '#3B3B3B',
-              alignSelf: 'center',
-            }}
-            inputStyle={{fontSize: 16, marginLeft: 5}}
-          />
-          {error == true && (age == null || parseInt(age, 10) < 0) ? (
-            <View style={{flex: 1, marginTop: 2}}>
-              <ErrorMessage msg={'Please enter valid Age'} />
+              alignContent: 'center',
+              alignItems: 'center',
+              marginLeft: '5%',
+            }}>
+            <View style={{width: '50%', height: 60}}>
+              <TextInputCustom
+                textVal={age}
+                autoCompleteType="off"
+                inputHandler={(txt) => {
+                  setAge(txt);
+                }}
+                placeholder="AGE"
+                keyboardType="number-pad"
+                viewStyle={{
+                  paddingLeft: 0,
+                  width: '85%',
+                  borderColor: '#3B3B3B',
+                  alignSelf: 'center',
+                }}
+                inputStyle={{fontSize: 16, marginLeft: 5}}
+              />
+              {error == true &&
+              (age == null || age == '' || parseInt(age, 10) < 0) ? (
+                <View style={{flex: 1, width: '100%'}}>
+                  <ErrorMessage msg={'Enter valid Age'} />
+                </View>
+              ) : null}
             </View>
-          ) : null}
-          <View style={styles.pickerStyle}>
-            <Picker
-              selectedValue={gender}
-              onValueChange={(val) => {
-                setGender(val);
-              }}>
-              <Picker.Item label="Select Gender" value={null} color="#3B3B3B" />
-              <Picker.Item label="MALE" value="MALE" />
-              <Picker.Item label="FEMALE" value="FEMALE" />
-              <Picker.Item label="OTHER" value="OTHER" />
-            </Picker>
+            <View style={{width: '45%', marginLeft: '6%', height: 60}}>
+              <View style={styles.pickerStyle}>
+                <Picker
+                  selectedValue={gender}
+                  onValueChange={(val) => {
+                    setGender(val);
+                  }}>
+                  <Picker.Item
+                    label="Select Gender"
+                    value={null}
+                    color="#3B3B3B"
+                  />
+                  <Picker.Item label="MALE" value="MALE" />
+                  <Picker.Item label="FEMALE" value="FEMALE" />
+                  <Picker.Item label="OTHER" value="OTHER" />
+                </Picker>
+              </View>
+              {error == true && gender == null ? (
+                <View style={{flex: 1, width: '100%'}}>
+                  <ErrorMessage msg={'Select Gender'} />
+                </View>
+              ) : null}
+            </View>
           </View>
-          {error == true && gender == null ? (
-            <View style={{flex: 1, marginTop: 2}}>
-              <ErrorMessage msg={'Please Select Gender'} />
-            </View>
-          ) : null}
-          <Text style={styles.resHeaderStyle}>UPLOAD RESUME</Text>
+
+          <Text style={styles.resHeaderStyle}>COMPANY BROCHURE</Text>
           {fileData == null ? (
             <TouchableOpacity
               style={[styles.fileStyle, {width: '80%'}]}
@@ -510,37 +748,21 @@ function ProfilePage(props) {
           )}
           {error == true && fileData == null ? (
             <View style={{flex: 1, marginTop: 2, marginBottom: 5}}>
-              <ErrorMessage msg={'Please Upload Resume'} />
+              <ErrorMessage msg={'Please Upload Company Broucher'} />
             </View>
           ) : null}
-          <Text
-            onPress={downloadSample}
-            style={{
-              width: '85%',
-              alignSelf: 'center',
-              marginTop: 15,
-              paddingLeft: 10,
-              color: 'darkblue',
-            }}>
-            Click here to check Resume Format
-          </Text>
-
           <TouchableOpacity
             onPress={() => {
               setIsLoading(true);
-              if (
-                image == null ||
-                frstName == '' ||
-                lastName == '' ||
-                age == null ||
-                gender == null ||
-                fileData == null
-              ) {
-                setError(true);
-                setIsLoading(false);
-              } else {
-                SaveProfile();
-              }
+              image == null ||
+              frstName == '' ||
+              lastName == '' ||
+              age == null ||
+              gender == null ||
+              fileData == null
+                ? setError(true)
+                : SaveProfile();
+              setIsLoading(true);
             }}
             style={styles.savebtn}>
             <Text
@@ -556,17 +778,6 @@ function ProfilePage(props) {
           </TouchableOpacity>
         </View>
       </View>
-      {isLoading ? (
-        <View
-          style={{
-            ...StyleSheet.absoluteFillObject,
-            zIndex: 10,
-            opacity: 0.5,
-            flex: 1,
-          }}>
-          <AnimatedLoader />
-        </View>
-      ) : null}
     </KeyboardAwareScrollView>
   );
 }
@@ -577,8 +788,8 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, {UpdateProfile, updateToken})(
-  ProfilePage,
+export default connect(mapStateToProps, {UpdateJobProfile, updateToken})(
+  JobsProfilePage,
 );
 
 const styles = StyleSheet.create({
@@ -597,11 +808,11 @@ const styles = StyleSheet.create({
   },
   pickerStyle: {
     paddingLeft: 0,
-    width: '85%',
+    width: '100%',
     alignSelf: 'center',
     borderColor: '#3B3B3B',
     borderBottomWidth: 1.5,
-    marginTop: 20,
+    marginTop: 14,
   },
   resHeaderStyle: {
     width: '85%',

@@ -13,6 +13,7 @@ import {Provider as PaperProvider} from 'react-native-paper';
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
+  timeout: null,
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

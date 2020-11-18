@@ -1,3 +1,7 @@
+import axios from 'axios';
+
+// axios = this.props.token;
+
 export const setUser = (
   new_email,
   new_username,
@@ -18,11 +22,25 @@ export const setUser = (
     refreshToken: refreshToken,
   };
 };
-export const updateToken = (accessToken, refreshToken) => {
-  return {
-    type: 'UPDATE_TOKEN',
-    accessToken: accessToken,
-    refreshToken: refreshToken,
+export const updateToken = (refreshToken) => {
+  return async (dispatch) => {
+    console.log('In UpdateToken');
+    axios
+      .post('http://192.168.137.1:5000/refresh_token', null, {
+        headers: {
+          refreshToken: refreshToken,
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+        dispatch({
+          type: 'UPDATE_TOKEN',
+          accessToken: res.data.accessToken,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 };
 
@@ -30,6 +48,20 @@ export const UpdateProfile = (profile) => {
   return {
     type: 'UPDATE_PROFILE',
     profile: profile,
+  };
+};
+export const UpdateJobProfile = (profile, company) => {
+  return {
+    type: 'UPDATE_JOB_PROFILE',
+    profile: profile,
+    companyName: company.name,
+    companyLocation: company.location,
+  };
+};
+
+export const LogOut = () => {
+  return {
+    type: 'Log_Out',
   };
 };
 
@@ -46,7 +78,9 @@ export const setLoginUser = (
   console.log('Action ', profile);
   if (profile == null) {
     console.log('in');
-    navigation.navigate('Profile');
+    new_role == 'CANDIDATE'
+      ? navigation.navigate('Profile')
+      : navigation.navigate('JobProfile');
     return {
       type: 'SET_USER',
       new_email: new_email,

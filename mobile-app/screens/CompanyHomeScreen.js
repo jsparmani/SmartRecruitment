@@ -1,15 +1,45 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, Image, FlatList, StyleSheet} from 'react-native';
 import {connect} from 'react-redux';
-import {gql, useMutation} from '@apollo/client';
+import {gql, useMutation, useQuery} from '@apollo/client';
 import {updateToken} from '../src/actions/dataAction';
 import TextInputCustom from '../Components/TextInputCustom';
 import Icon from 'react-native-vector-icons/AntDesign';
 
-function HomeScreen(props) {
-  console.log('HomeSreen ', props.accessToken);
+const jobs_query = gql`
+  query getJobs($id: Int!) {
+    job(id: $id) {
+      id
+      title
+      description
+      requirements
+      appliedCandidates {
+        username
+      }
+      questions
+    }
+  }
+`;
+
+function CompanyHomeScreen(props) {
+  console.log('HomeSreen ', props.id);
   const tempData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  const [jobsList, setJobsList] = useState(null);
+
+  const {data, error, loading} = useQuery(jobs_query, {
+    variables: {
+      id: props.id,
+    },
+    onCompleted: (dataa) => {
+      console.log(dataa);
+    },
+    onError: (err) => {
+      console.log(err);
+    },
+  });
+  console.log(data, loading, error);
 
   return (
     <View style={{backgroundColor: '#EAEEF1', flex: 1}}>
@@ -147,12 +177,13 @@ function HomeScreen(props) {
 const mapStateToProps = (state) => {
   return {
     profile: state.authRed.profile,
+    id: state.authRed.id,
     refreshToken: state.authRed.refreshToken,
     accessToken: state.authRed.accessToken,
   };
 };
 
-export default connect(mapStateToProps, {updateToken})(HomeScreen);
+export default connect(mapStateToProps, {updateToken})(CompanyHomeScreen);
 
 const styles = StyleSheet.create({
   cardStyle: {
