@@ -48,7 +48,7 @@ export class JobResolver {
   @UseMiddleware(isAuth)
   @Query(() => [Job])
   async jobs(): Promise<Job[]> {
-    return await Job.find({ relations: ['company'] });
+    return await Job.find({ relations: ['company', 'company.admin', 'company.admin.profile'] });
   }
 
   @UseMiddleware(isCompany)
