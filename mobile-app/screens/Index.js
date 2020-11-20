@@ -6,6 +6,7 @@ import HomeScreen from './HomeScreen';
 import JobDetailsScreen from './JobDeatilsScreen';
 import SignInScreen from './SignInScreen';
 import ProfilePage from './ProfilePage';
+import CompanyDetails from './CompanyDetails';
 import SignUpScreen from './SignUpScreen';
 import {connect} from 'react-redux';
 import {
@@ -18,14 +19,9 @@ import {setContext} from '@apollo/client/link/context';
 import SettingsScreen from './SettingsScreen';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
-// Initialize Apollo Client
-// const client = new ApolloClient({
-//   // uri: '192.168.137.1:5000/graphql',
-//   uri: 'http://10.0.2.2:5000/graphql',
-//   // uri: 'http://localhost:5000/graphql',
-//   cache: new InMemoryCache(),
-// });
+import JobsProfilePage from './JobsProfilePage';
+import CompanyHomeScreen from './CompanyHomeScreen';
+import {updateToken} from '../src/actions/dataAction';
 
 function Index(props) {
   const Stack = createStackNavigator();
@@ -33,8 +29,8 @@ function Index(props) {
 
   const httpLink = createHttpLink({
     // uri: 'http://10.0.2.2:5000/graphql',
-    // uri: 'http://192.168.137.1:5000/graphql',
-    uri: 'http://192.168.0.105:5000/graphql',
+    uri: 'http://192.168.137.1:5000/graphql',
+    // uri: 'http://192.168.0.105:5000/graphql',
     // uri: 'http://localhost:5000/graphql',
   });
 
@@ -82,7 +78,7 @@ function Index(props) {
     },
   };
 
-  const MainScreen = () => {
+  const CanditateMainScreen = () => {
     return (
       <Stack.Navigator
         screenOptions={{
@@ -105,6 +101,24 @@ function Index(props) {
               open: config,
               close: config,
             },
+          }}
+        />
+      </Stack.Navigator>
+    );
+  };
+
+  const CompanyMainScreen = () => {
+    return (
+      <Stack.Navigator
+        screenOptions={{
+          animationEnabled: true,
+          animationTypeForReplace: 'push',
+        }}>
+        <Stack.Screen
+          name="Home"
+          component={CompanyHomeScreen}
+          options={{
+            headerShown: false,
           }}
         />
       </Stack.Navigator>
@@ -139,10 +153,20 @@ function Index(props) {
             component={ProfilePage}
             name="Profile"
           />
+          <Stack.Screen
+            options={{
+              headerShown: false,
+            }}
+            component={JobsProfilePage}
+            name="JobProfile"
+          />
         </Stack.Navigator>
       </ApolloProvider>
     );
   } else if (props.accessToken != '' && props.profile != null) {
+    // props.updateToken(props.refreshToken);
+    // console.log('Acess Token : ', props.accessToken);
+    // console.log('Acess Token : ', props.accessToken);
     return (
       <ApolloProvider client={client}>
         <Tab.Navigator
@@ -163,16 +187,20 @@ function Index(props) {
               })
             }
             name="Home"
-            component={MainScreen}
+            component={
+              props.role == 'CANDIDATE'
+                ? CanditateMainScreen
+                : CompanyMainScreen
+            }
           />
           <Tab.Screen
             options={{
               tabBarIcon: ({color}) => (
-                <MaterialIcons name="settings" color={color} size={26} />
+                <MaterialIcons name="person" color={color} size={26} />
               ),
             }}
             name="Profile2"
-            component={ProfilePage}
+            component={JobsProfilePage}
           />
           <Tab.Screen
             options={{
@@ -194,6 +222,8 @@ const mapStateToProps = (state) => {
     profile: state.authRed.profile,
     accessToken: state.authRed.accessToken,
     id: state.authRed.id,
+    role: state.authRed.role,
+    refreshToken: state.authRed.refreshToken,
   };
 };
-export default connect(mapStateToProps, {})(Index);
+export default connect(mapStateToProps, {updateToken})(Index);

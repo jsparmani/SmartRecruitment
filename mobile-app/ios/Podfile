@@ -8,6 +8,7 @@ target 'AIRecruiter' do
 
   use_react_native!(:path => config["reactNativePath"])
 
+
   target 'AIRecruiterTests' do
     inherit! :complete
     # Pods for testing
