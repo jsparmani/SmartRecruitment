@@ -24,7 +24,7 @@ export const setUser = (
 };
 export const updateToken = (refreshToken) => {
   return async (dispatch) => {
-    console.log('In UpdateToken');
+    console.log('In UpdateToken ', refreshToken);
     axios
       .post('http://192.168.137.1:5000/refresh_token', null, {
         headers: {
@@ -32,11 +32,13 @@ export const updateToken = (refreshToken) => {
         },
       })
       .then((res) => {
-        console.log(res.data);
-        dispatch({
-          type: 'UPDATE_TOKEN',
-          accessToken: res.data.accessToken,
-        });
+        console.log('Updating Token : ', res.data);
+        res.data.ok
+          ? dispatch({
+              type: 'UPDATE_TOKEN',
+              accessToken: res.data.accessToken,
+            })
+          : null;
       })
       .catch((err) => {
         console.log(err);
@@ -56,6 +58,22 @@ export const UpdateJobProfile = (profile, company) => {
     profile: profile,
     companyName: company.name,
     companyLocation: company.location,
+  };
+};
+
+export const CompanyDetail = (company) => {
+  return {
+    type: 'UPDATE_COMP_PROFILE',
+    companyName: company.name,
+    companyLocation: company.location,
+    jobs: company.jobs,
+  };
+};
+
+export const JobDetails = (jobs) => {
+  return {
+    type: 'UPDATE_JOBS',
+    jobs: jobs,
   };
 };
 

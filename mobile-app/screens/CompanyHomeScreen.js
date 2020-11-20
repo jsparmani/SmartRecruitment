@@ -1,45 +1,68 @@
-/* eslint-disable react-native/no-inline-styles */
 import React, {useEffect, useState} from 'react';
-import {View, Text, Image, FlatList, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import {connect} from 'react-redux';
 import {gql, useMutation, useQuery} from '@apollo/client';
-import {updateToken} from '../src/actions/dataAction';
+import {CompanyDetail, updateToken} from '../src/actions/dataAction';
 import TextInputCustom from '../Components/TextInputCustom';
 import Icon from 'react-native-vector-icons/AntDesign';
 
-const jobs_query = gql`
-  query getJobs($id: Int!) {
-    job(id: $id) {
-      id
-      title
-      description
-      requirements
-      appliedCandidates {
-        username
+const me_query = gql`
+  query Me {
+    me {
+      company {
+        name
+        id
+        location
+        jobs {
+          title
+          description
+          requirements
+          department
+          id
+          appliedCandidates {
+            username
+            id
+            responses {
+              answer
+            }
+          }
+          questions
+        }
       }
-      questions
     }
   }
 `;
 
 function CompanyHomeScreen(props) {
-  console.log('HomeSreen ', props.id);
+  console.log('HomeSreen ', props.accessToken);
   const tempData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-  const [jobsList, setJobsList] = useState(null);
+  const [CompanyDetails, setCompanyDetails] = useState(null);
 
-  const {data, error, loading} = useQuery(jobs_query, {
-    variables: {
-      id: props.id,
-    },
+  const {data, error, loading} = useQuery(me_query, {
+    // variables: {
+    //   id: props.id,
+    // },
     onCompleted: (dataa) => {
-      console.log(dataa);
+      console.log('data : ', dataa);
+      if (dataa.me != null) {
+        // setCompanyDetails(dataa.me.company);
+        props.CompanyDetail(dataa.me.company);
+      }
     },
     onError: (err) => {
       console.log(err);
     },
   });
-  console.log(data, loading, error);
+  // console.log(data, loading, error);
+  // console.log(CompanyDetails.jobs);
 
   return (
     <View style={{backgroundColor: '#EAEEF1', flex: 1}}>
@@ -56,16 +79,28 @@ function CompanyHomeScreen(props) {
             flexDirection: 'row',
             alignItems: 'center',
           }}>
-          <Image
-            style={{width: 80, height: 80, borderRadius: 80}}
-            source={{uri: props.profile.photo}}
-          />
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 200,
+              overflow: 'hidden',
+              backgroundColor: '#fff',
+              justifyContent: 'center',
+              alignItems: 'center',
+              elevation: 20,
+            }}>
+            <Image
+              style={{width: '95%', height: '95%'}}
+              source={{uri: props.profile.photo}}
+            />
+          </View>
           <View style={{marginLeft: 15}}>
-            <Text style={{color: '#fff', fontSize: 16}}>
-              Hello {props.profile.name.split(' ')[0]} ,
+            <Text style={{color: '#fff', fontSize: 16, fontWeight: '200'}}>
+              Hello {props.companyName}
             </Text>
-            <Text style={{color: '#fff', fontSize: 20, fontWeight: '400'}}>
-              Find Your Dream Job
+            <Text style={{color: '#fff', fontSize: 18, fontWeight: '400'}}>
+              Lets Create More Jobs !!
             </Text>
           </View>
         </View>
@@ -95,81 +130,130 @@ function CompanyHomeScreen(props) {
         />
       </View>
       <View style={{flex: 3.2, paddingTop: 20}}>
-        <Text style={{paddingLeft: 20, fontSize: 16, letterSpacing: 0.2}}>
-          POPULAR JOBS
+        <Text
+          style={{
+            paddingLeft: 30,
+            fontSize: 17,
+            fontWeight: '800',
+            letterSpacing: 0.2,
+            textDecorationLine: 'underline',
+          }}>
+          Jobs You added
         </Text>
-        <FlatList
-          style={{flex: 1}}
-          data={tempData}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={() => (
-            <View style={styles.cardStyle}>
-              <View style={styles.logoStyle}>
-                <Image
-                  style={{width: '100%', height: '60%'}}
-                  resizeMode="contain"
-                  source={{
-                    uri:
-                      'https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png',
-                  }}
-                />
-              </View>
-              <View
-                style={{
-                  width: '82%',
-                  paddingHorizontal: 12,
-                  paddingRight: 20,
-                  paddingTop: 10,
-                }}>
-                <Text
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  style={{fontSize: 16}}>
-                  Software Developer Engineer
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  style={{fontSize: 13}}>
-                  Google 📍 Mumbai, IN
-                </Text>
+        {props.jobs != null ? (
+          <FlatList
+            style={{flex: 1, marginTop: 5}}
+            contentContainerStyle={{paddingBottom: 58}}
+            data={props.jobs}
+            keyExtractor={(item, index) => index.toString()}
+            ListEmptyComponent={() => {
+              return (
                 <View
                   style={{
-                    flexDirection: 'row',
-                    width: '100%',
-                    justifyContent: 'space-between',
-                    marginTop: 'auto',
-                    height: 30,
+                    flex: 1,
+                    alignItems: 'center',
+                    height: '100%',
+                  }}>
+                  <Image
+                    source={require('../assets/nodatafound.png')}
+                    style={{width: '100%', height: 200}}
+                    resizeMode="contain"
+                  />
+                </View>
+              );
+            }}
+            renderItem={({item, index}) => (
+              <View style={styles.cardStyle}>
+                <View style={styles.logoStyle}>
+                  <Image
+                    style={{width: '100%', height: '60%'}}
+                    resizeMode="contain"
+                    source={{
+                      uri: props.profile.photo,
+                      // 'https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png',
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    width: '82%',
+                    paddingHorizontal: 12,
+                    paddingRight: 20,
+                    paddingTop: 10,
                   }}>
                   <Text
-                    style={{
-                      color: '#358C96',
-                      width: 'auto',
-                      paddingHorizontal: 12,
-                      textAlignVertical: 'center',
-                      fontWeight: 'bold',
-                    }}>
-                    APPLY NOW
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    style={{fontSize: 16}}>
+                    {item.title}
                   </Text>
                   <Text
-                    onPress={() => {
-                      props.navigation.navigate('JobDetails');
-                    }}
-                    style={{
-                      color: '#358C96',
-                      width: 'auto',
-                      paddingHorizontal: 12,
-                      textAlignVertical: 'center',
-                      fontWeight: 'bold',
-                    }}>
-                    MORE...
+                    numberOfLines={1}
+                    // adjustsFontSizeToFit
+                    style={{fontSize: 13, marginTop: 10, paddingRight: 10}}>
+                    {item.description}
                   </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      width: '100%',
+                      justifyContent: 'flex-end',
+                      marginTop: 'auto',
+                      height: 30,
+                    }}>
+                    <Text
+                      onPress={() => {
+                        props.navigation.navigate('JobEdits', {});
+                      }}
+                      style={{
+                        color: '#358C96',
+                        width: 'auto',
+                        paddingHorizontal: 12,
+                        textAlignVertical: 'center',
+                        fontWeight: 'bold',
+                      }}>
+                      MORE...
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
-        />
+            )}
+          />
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              height: '100%',
+            }}>
+            <Image
+              source={require('../assets/nodatafound.png')}
+              style={{width: '100%', height: 200}}
+              resizeMode="contain"
+            />
+          </View>
+        )}
       </View>
+      <TouchableOpacity
+        activeOpacity={0.75}
+        onPress={() => {
+          props.navigation.navigate('AddJob');
+        }}
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 50,
+          backgroundColor: '#497AD7',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'absolute',
+          zIndex: 10,
+          elevation: 10,
+          bottom: 5,
+          alignSelf: 'center',
+        }}>
+        <Icon name="plus" size={35} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -179,11 +263,16 @@ const mapStateToProps = (state) => {
     profile: state.authRed.profile,
     id: state.authRed.id,
     refreshToken: state.authRed.refreshToken,
+    jobs: state.authRed.jobs,
     accessToken: state.authRed.accessToken,
+    companyName: state.authRed.companyName,
+    companyLocation: state.authRed.companyLocation,
   };
 };
 
-export default connect(mapStateToProps, {updateToken})(CompanyHomeScreen);
+export default connect(mapStateToProps, {updateToken, CompanyDetail})(
+  CompanyHomeScreen,
+);
 
 const styles = StyleSheet.create({
   cardStyle: {
@@ -198,7 +287,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   logoStyle: {
-    width: '18%',
+    width: '16%',
     paddingHorizontal: 5,
     height: '100%',
     borderRightWidth: 1,

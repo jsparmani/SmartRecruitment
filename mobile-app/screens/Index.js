@@ -22,6 +22,8 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import JobsProfilePage from './JobsProfilePage';
 import CompanyHomeScreen from './CompanyHomeScreen';
 import {updateToken} from '../src/actions/dataAction';
+import AddJobScreen from './AddJobScreen';
+import JobEditScreen from './JobEditScreen';
 
 function Index(props) {
   const Stack = createStackNavigator();
@@ -33,6 +35,10 @@ function Index(props) {
     // uri: 'http://192.168.0.105:5000/graphql',
     // uri: 'http://localhost:5000/graphql',
   });
+
+  useEffect(() => {
+    props.updateToken(props.refreshToken);
+  }, []);
 
   const authLink = setContext((_, {headers}) => {
     // get the authentication token from local storage if it exists
@@ -117,6 +123,24 @@ function Index(props) {
         <Stack.Screen
           name="Home"
           component={CompanyHomeScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="JobEdits"
+          component={JobEditScreen}
+          options={{
+            headerShown: false,
+            transitionSpec: {
+              open: config,
+              close: config,
+            },
+          }}
+        />
+        <Stack.Screen
+          name="AddJob"
+          component={AddJobScreen}
           options={{
             headerShown: false,
           }}
