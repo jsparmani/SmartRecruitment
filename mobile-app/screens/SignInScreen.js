@@ -52,10 +52,10 @@ function SignInScreen(props) {
 
   const {width, height} = Dimensions.get('screen');
   const [visible, setVisible] = useState(false);
-  const [password, setPassword] = useState('abcdefghk');
-  const [email, setEmail] = useState('abcdefghk');
-  // const [password, setPassword] = useState('abcdefg');
-  // const [email, setEmail] = useState('abcdefg');
+  // const [password, setPassword] = useState('abcdefghkl');
+  // const [email, setEmail] = useState('abcdefghkl');
+  const [password, setPassword] = useState('abcdefg');
+  const [email, setEmail] = useState('abcdefg');
   const [isLoading, setIsLoading] = useState(false);
   const [userErr, setUserErr] = useState('');
   const [errorr, setErrorr] = useState(false);

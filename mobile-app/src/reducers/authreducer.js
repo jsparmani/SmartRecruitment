@@ -9,6 +9,7 @@ const Initial_State = {
   profile: null,
   companyLocation: null,
   companyName: null,
+  jobs: null,
   id: null,
 };
 
@@ -49,6 +50,18 @@ export default (state = Initial_State, action) => {
         profile: action.profile,
         companyName: action.companyName,
         companyLocation: action.companyLocation,
+      };
+    case 'UPDATE_COMP_PROFILE':
+      return {
+        ...state,
+        jobs: action.jobs,
+        companyName: action.companyName,
+        companyLocation: action.companyLocation,
+      };
+    case 'UPDATE_JOBS':
+      return {
+        ...state,
+        jobs: action.jobs,
       };
     case 'UPDATE_TOKEN':
       return {

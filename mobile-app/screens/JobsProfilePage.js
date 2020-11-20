@@ -13,6 +13,8 @@ import {
   Alert,
   ToastAndroid,
   BackHandler,
+  SafeAreaView,
+  LogBox,
 } from 'react-native';
 import TextInputCustom from '../Components/TextInputCustom';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -24,7 +26,6 @@ import {StackActions} from '@react-navigation/native';
 import {gql, useMutation} from '@apollo/client';
 import {connect} from 'react-redux';
 import {UpdateJobProfile, updateToken} from '../src/actions/dataAction';
-import AnimatedLoader from './AnimatedLoader';
 import axios from 'axios';
 import qs from 'qs';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -82,20 +83,20 @@ function JobsProfilePage(props) {
   // const [error, setError] = useState(false);
   // const [orientation, setOrientation] = useState('Portrait');
 
-  const [frstName, setFrstName] = useState('Prakhar');
-  const [lastName, setLastName] = useState('Jindal');
+  const [frstName, setFrstName] = useState('Jay');
+  const [lastName, setLastName] = useState('Parmani');
   const [age, setAge] = useState('20');
   const [gender, setGender] = useState('MALE');
   const [fileData, setfileData] = useState(null);
   const [image, setImage] = useState(null);
-  const [ImageUrl, setImageUrl] = useState('');
-  const [FileUrl, setFileUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState(null);
+  const [fileUrl, setFileUrl] = useState(null);
   const [error, setError] = useState(false);
   const [orientation, setOrientation] = useState('Portrait');
   const [ageError, setAgeError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const [CompanyName, setCompanyName] = useState('Telegram Inc.');
+  const [CompanyName, setCompanyName] = useState('Google Inc.');
   const [Location, setLocation] = useState('');
   //   const [Location, setLocation] = useState('Mumbai , India');
   const [locToken, setLocToken] = useState('');
@@ -142,7 +143,7 @@ function JobsProfilePage(props) {
         if (err.message == 'Not authenticated') {
           await props.updateToken(props.refreshToken);
           setIsLoading(false);
-          uploadProfile();
+          uploadProfile(imageUrl, fileUrl);
         }
         setIsLoading(false);
       },
@@ -219,6 +220,7 @@ function JobsProfilePage(props) {
       backButtonHandler,
     );
     requestLocationPermission();
+    LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
 
     var data = qs.stringify({
       grant_type: 'client_credentials',
@@ -302,6 +304,9 @@ function JobsProfilePage(props) {
       name: `${frstName}_${lastName}_resume.jpg`,
     };
 
+    var logo = '';
+    var brouch = '';
+
     const data = new FormData();
     data.append('file', img);
     data.append('upload_preset', 'Company_Logo');
@@ -319,21 +324,23 @@ function JobsProfilePage(props) {
       },
     })
       .then((res) => res.json())
-      .then((val) => {
+      .then(async (val) => {
         var photo = image;
         photo.uri = val.secure_url;
         setImage(photo);
         console.log('added', ' ', val.secure_url);
-        setImageUrl(val.secure_url);
+        await setImageUrl(val.secure_url);
+        logo = val.secure_url;
         fetch('https://api.cloudinary.com/v1_1/ai-recruitment/image/upload', {
           method: 'post',
           body: data_form,
         })
           .then((res2) => res2.json())
-          .then((val2) => {
+          .then(async (val2) => {
             console.log('added file', ' ', val2);
-            setFileUrl(val2.secure_url);
-            uploadProfile();
+            await setFileUrl(val2.secure_url);
+            brouch = val2.secure_url;
+            uploadProfile(logo, brouch);
           })
           .catch((err) => {
             Alert.alert('An Error Occured While Uploading : ', err);
@@ -365,13 +372,13 @@ function JobsProfilePage(props) {
       });
   };
 
-  const uploadProfile = () => {
+  const uploadProfile = (logo, brouch) => {
     console.log({
       name: `${frstName} ${lastName}`,
       age: parseInt(age, 10),
       gender: gender,
-      photo: ImageUrl,
-      resume: FileUrl,
+      photo: imageUrl,
+      resume: fileUrl,
     });
     profileUpdate({
       variables: {
@@ -379,8 +386,8 @@ function JobsProfilePage(props) {
           name: `${frstName} ${lastName}`,
           age: parseInt(age, 10),
           gender: gender,
-          photo: ImageUrl,
-          resume: FileUrl,
+          photo: logo,
+          resume: brouch,
         },
       },
     });
@@ -570,65 +577,67 @@ function JobsProfilePage(props) {
             ) : null}
           </View>
           {Searches != null || Searches != [] ? (
-            <FlatList
-              data={Searches}
-              style={{
-                height: 'auto',
-                maxHeight: 200,
-                width: '85%',
-                alignSelf: 'center',
-                marginTop: 5,
-                paddingBottom: 5,
-              }}
-              // ListEmptyComponent={null}
-              renderItem={({item, ind}) => {
-                console.log(item);
-                return (
-                  <TouchableOpacity
-                    onPress={() => {
-                      setLocation(item.placeAddress);
-                      setSearches(null);
-                    }}
-                    style={{
-                      height: 'auto',
-                      maxHeight: 80,
-                      marginVertical: 5,
-                      backgroundColor: '#51515120',
-                      paddingLeft: 10,
-                      paddingVertical: 5,
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      borderRadius: 15,
-                    }}>
-                    {/* <Text
+            <SafeAreaView style={{flex: 1}}>
+              <FlatList
+                data={Searches}
+                style={{
+                  height: 'auto',
+                  maxHeight: 200,
+                  width: '85%',
+                  alignSelf: 'center',
+                  marginTop: 5,
+                  paddingBottom: 5,
+                }}
+                // ListEmptyComponent={null}
+                renderItem={({item, ind}) => {
+                  console.log(item);
+                  return (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setLocation(item.placeAddress);
+                        setSearches(null);
+                      }}
+                      style={{
+                        height: 'auto',
+                        maxHeight: 80,
+                        marginVertical: 5,
+                        backgroundColor: '#51515120',
+                        paddingLeft: 10,
+                        paddingVertical: 5,
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        borderRadius: 15,
+                      }}>
+                      {/* <Text
                       style={{fontSize: 15, width: '100%', fontWeight: 'bold'}}>
                       {item.placeName}
                     </Text> */}
-                    <Text
-                      style={{
-                        fontSize: 15,
-                        width: '10%',
-                        fontWeight: 'bold',
-                        height: '100%',
-                        textAlignVertical: 'center',
-                      }}>
-                      📌
-                    </Text>
-                    <Text
-                      style={{
-                        width: '90%',
-                        height: '100%',
-                        color: 'black',
-                        fontSize: 13,
-                        marginTop: 5,
-                        fontWeight: 'bold',
-                      }}>
-                      {item.placeAddress}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              }}
-            />
+                      <Text
+                        style={{
+                          fontSize: 15,
+                          width: '10%',
+                          fontWeight: 'bold',
+                          height: '100%',
+                          textAlignVertical: 'center',
+                        }}>
+                        📌
+                      </Text>
+                      <Text
+                        style={{
+                          width: '90%',
+                          height: '100%',
+                          color: 'black',
+                          fontSize: 13,
+                          marginTop: 5,
+                          fontWeight: 'bold',
+                        }}>
+                        {item.placeAddress}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            </SafeAreaView>
           ) : null}
           <View
             style={{
