@@ -1,0 +1,95 @@
+.body{
+    background-image: url("../../Images/Robot-with-human-handshake.png");
+    background-color: #3eb6ee;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    position:fixed;
+    padding:0;
+    margin:0;
+
+    top:0;
+    left:0;
+
+    width: 100%;
+    height: 100%;
+}
+
+.form{
+    border-radius: 5px;
+    /* box-shadow: 0 4px 8px 0 rgb(255, 255, 255); */
+    font-family: sans-serif ;
+    background-color: #EEFBFB ;
+    color: #007CC7;
+    display: flex;
+    flex-direction: column;
+    justify-content:space-around;
+    align-items: center;
+    width: 300px;
+    height: 80vh;
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    transform: translate(-50%,-100%);
+
+}
+
+.input{
+    display: flex;
+    flex-direction: column;
+    justify-content:space-around;
+    align-items: center;
+    flex-grow: 0.5;
+    width: 200px;
+
+}
+.forgotpassword{
+    font-size: 14px;
+}
+.forgotpassword:hover{
+    color: #12232E;
+    cursor: pointer;
+    
+}
+
+.signin{
+    background-color:  #007CC7;
+    color: #EEFBFB;
+    width:200px;
+    height: 30px;
+    border: none;
+    
+}
+
+.signin:hover{
+    background-color: #12232E;
+    cursor: pointer;
+}
+
+.last{
+    font-size: 12px;
+    color: black;
+    
+}
+
+.link{
+    color:#007CC7;
+}
+.link:hover{
+    color:#12232E;
+    cursor: pointer;
+}
+
+.foot{
+    display: flex;
+    flex-direction: column;
+    justify-content:space-around;
+    align-items: center;
+    
+}
+
+
+.role{
+    color: black;
+}
