@@ -1,0 +1,89 @@
+.body{
+    background-color: #3eb6ee;
+    background-image: url("../../Images/Robot-with-human-handshake.png");
+    background-position: center center;
+  
+  /* Background image doesn't tile */
+  background-repeat: no-repeat;
+  
+  /* Background image is fixed in the viewport so that it doesn't move when 
+     the content's height is greater than the image's height */
+  background-attachment: fixed;
+  
+  /* This is what makes the background image rescale based
+     on the container's size */
+  background-size: cover;
+}
+
+.form{
+    border-radius: 5px;
+    /* box-shadow: 0 4px 8px 0 rgb(255, 255, 255); */
+    font-family: sans-serif ;
+    background-color: #EEFBFB ;
+    color: #007CC7;
+    display: flex;
+    flex-direction: column;
+    justify-content:space-around;
+    align-items: center;
+    width: 300px;
+    height: 80vh;
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    transform: translate(-50%,-100%);
+
+}
+
+.input{
+    display: flex;
+    flex-direction: column;
+    justify-content:space-around;
+    align-items: center;
+    flex-grow: 0.5;
+    width: 200px;
+
+}
+.forgotpassword{
+    font-size: 14px;
+}
+.forgotpassword:hover{
+    color: #12232E;
+    cursor: pointer;
+    
+}
+
+.signin{
+    background-color:  #007CC7;
+    color: #EEFBFB;
+    width:200px;
+    height: 30px;
+    border: none;
+    
+}
+
+.signin:hover{
+    background-color: #12232E;
+    cursor: pointer;
+}
+
+.last{
+    font-size: 12px;
+    color: black;
+    
+}
+
+.link{
+    color:#007CC7;
+}
+.link:hover{
+    color:#12232E;
+    cursor: pointer;
+}
+
+.foot{
+    display: flex;
+    flex-direction: column;
+    justify-content:space-around;
+    align-items: center;
+    
+}

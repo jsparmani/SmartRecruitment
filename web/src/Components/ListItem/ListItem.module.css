@@ -1,0 +1,15 @@
+.child{
+    background-color: white;
+    border-radius: 5px;
+    width: 95%;
+    margin: 5px;
+    padding: 5px;
+}
+
+
+
+.img{
+    border-radius: 50%;
+    height: 50px;
+    width: 50px;
+}
