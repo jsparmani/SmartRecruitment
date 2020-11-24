@@ -29,7 +29,7 @@ export const updateToken = (refreshToken) => {
       .post('http://192.168.137.1:5000/refresh_token', null, {
         headers: {
           refreshToken: refreshToken,
-        },
+        }
       })
       .then((res) => {
         console.log('Updating Token : ', res.data);
