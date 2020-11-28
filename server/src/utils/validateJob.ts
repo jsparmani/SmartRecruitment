@@ -1,6 +1,7 @@
+import { JobUpdateInput } from './../resolvers/inputs/JobUpdateInput';
 import { JobInput } from './../resolvers/inputs/JobInput';
 
-export const validateJob = (options: JobInput) => {
+export const validateJob = (options: JobInput | JobUpdateInput) => {
   const { title, description, requirements, department } = options;
 
   if (!title) {

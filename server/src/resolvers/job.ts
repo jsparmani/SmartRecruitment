@@ -1,3 +1,4 @@
+import { JobUpdateInput } from './inputs/JobUpdateInput';
 import { isCandidate } from './../middleware/isCandidate';
 import { validateQuestions } from './../utils/validateQuestions';
 import { QuestionsInput } from './inputs/QuestionsInput';
@@ -48,7 +49,9 @@ export class JobResolver {
   @UseMiddleware(isAuth)
   @Query(() => [Job])
   async jobs(): Promise<Job[]> {
-    return await Job.find({ relations: ['company', 'company.admin', 'company.admin.profile'] });
+    return await Job.find({
+      relations: ['company', 'company.admin', 'company.admin.profile'],
+    });
   }
 
   @UseMiddleware(isCompany)
@@ -109,6 +112,78 @@ export class JobResolver {
 
   @UseMiddleware(isCompany)
   @Mutation(() => JobResponse)
+  async updateJob(
+    @Arg('input', () => JobUpdateInput) input: JobUpdateInput,
+    @Ctx() { payload }: MyContext,
+  ): Promise<JobResponse> {
+    if (!payload?.userId) {
+      return {
+        errors: [{ field: 'userId', message: 'Invalid userId' }],
+      };
+    }
+
+    const { title, description, requirements, department, id } = input;
+    const errors = validateJob(input);
+    if (errors) {
+      return {
+        errors,
+      };
+    }
+
+    const user = await User.findOne(payload.userId);
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: 'userId',
+            message: 'Invalid User',
+          },
+        ],
+      };
+    }
+
+    const company = await Company.findOne({ where: { admin: user } });
+
+    if (!company) {
+      return {
+        errors: [
+          { field: 'company', message: 'Please register a company first' },
+        ],
+      };
+    }
+
+    const job = await Job.findOne(id, {
+      relations: ['company', 'company.admin'],
+    });
+    if (!job) {
+      return {
+        errors: [
+          {
+            field: 'id',
+            message: 'Invalid Job Id',
+          },
+        ],
+      };
+    }
+
+    if (job.company.admin.username !== user.username) {
+      throw new Error(
+        "Invalid Operation. You can't edit a job that doesn't belong to you",
+      );
+    }
+
+    job.title = title;
+    job.department = department;
+    job.description = description;
+    job.requirements = requirements;
+
+    return {
+      job: await job.save(),
+    };
+  }
+
+  @UseMiddleware(isCompany)
+  @Mutation(() => JobResponse)
   async addQuestions(
     @Arg('input', () => QuestionsInput) input: QuestionsInput,
     @Ctx() { payload }: MyContext,
@@ -120,7 +195,9 @@ export class JobResolver {
 
     const { questions, jobId } = input;
 
-    const job = await Job.findOne(jobId, { relations: ['company'] });
+    const job = await Job.findOne(jobId, {
+      relations: ['company', 'company.admin'],
+    });
 
     if (!job) {
       return {
@@ -133,15 +210,11 @@ export class JobResolver {
       };
     }
 
-    //TODO: Only a job that belongs to a user could be edited, others cannot be edited
-
-    // FIXME: Below code doesn't work, mainly job.company.admin.username is undefined
-
-    /* if (job.company.admin.username !== user.username) {
+    if (job.company.admin.username !== user.username) {
       throw new Error(
         "Invalid Operation. You can't edit a job that doesn't belong to you",
       );
-    } */
+    }
 
     const errors = validateQuestions(input);
 
