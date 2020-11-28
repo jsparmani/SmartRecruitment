@@ -287,4 +287,36 @@ export class JobResolver {
 
     return true;
   }
+
+  @UseMiddleware(isCompany)
+  @Mutation(() => Boolean)
+  async deleteJob(
+    @Arg('jobId', () => Int) id: number,
+    @Ctx() { payload }: MyContext,
+  ): Promise<Boolean> {
+    const user = await User.findOne(payload?.userId);
+
+    if (!user) {
+      throw new Error('Invalid User');
+    }
+
+    const job = await Job.findOne(id, {
+      relations: ['company', 'company.admin'],
+    });
+    if (!job) {
+      throw new Error('No such job exists');
+    }
+
+    if (job.company.admin.username !== user.username) {
+      return false;
+    }
+
+    try {
+      await job.remove();
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+    return true;
+  }
 }
