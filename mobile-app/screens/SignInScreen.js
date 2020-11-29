@@ -36,6 +36,9 @@ const login_mutation = gql`
           photo
           resume
         }
+        appliedJobs {
+          id
+        }
       }
       errors {
         field
@@ -52,10 +55,10 @@ function SignInScreen(props) {
 
   const {width, height} = Dimensions.get('screen');
   const [visible, setVisible] = useState(false);
-  // const [password, setPassword] = useState('abcdefghkl');
-  // const [email, setEmail] = useState('abcdefghkl');
-  const [password, setPassword] = useState('abcdefg');
-  const [email, setEmail] = useState('abcdefg');
+  const [password, setPassword] = useState('abcdefghkl');
+  const [email, setEmail] = useState('abcdefghkl');
+  // const [password, setPassword] = useState('abcdefg');
+  // const [email, setEmail] = useState('abcdefg');
   const [isLoading, setIsLoading] = useState(false);
   const [userErr, setUserErr] = useState('');
   const [errorr, setErrorr] = useState(false);
@@ -77,6 +80,8 @@ function SignInScreen(props) {
       } else {
         var user = data.login.user;
         setIsLoading(false);
+        console.log('Signing In');
+        console.log(user.appliedJobs);
         await props.setLoginUser(
           email,
           user.User,
@@ -85,6 +90,7 @@ function SignInScreen(props) {
           data.login.accessToken,
           data.login.refreshToken,
           data.id,
+          user.appliedJobs,
           props.navigation,
         );
       }
