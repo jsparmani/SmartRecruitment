@@ -11,6 +11,7 @@ const Initial_State = {
   companyName: null,
   jobs: null,
   id: null,
+  appliedJobs: [],
 };
 
 export default (state = Initial_State, action) => {
@@ -43,6 +44,11 @@ export default (state = Initial_State, action) => {
       return {
         ...state,
         profile: action.profile,
+      };
+    case 'UPDATE_APPLIED_JOBS':
+      return {
+        ...state,
+        appliedJobs: action.appliedJobs,
       };
     case 'UPDATE_JOB_PROFILE':
       return {
@@ -94,7 +100,11 @@ export default (state = Initial_State, action) => {
         email: '',
         role: '',
         profile: null,
+        companyLocation: null,
+        companyName: null,
+        jobs: null,
         id: null,
+        appliedJobs: [],
       };
 
     default:

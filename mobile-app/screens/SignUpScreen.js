@@ -37,6 +37,9 @@ const register_mutation = gql`
           photo
           resume
         }
+        appliedJobs {
+          id
+        }
       }
       errors {
         field
@@ -74,7 +77,7 @@ function SignUpScreen(props) {
           }
         });
       } else {
-        const {profile, id} = data.register.user;
+        const {profile, id, appliedJobs} = data.register.user;
         const {accessToken, refreshToken} = data.register;
         console.log(data.register.user);
         await props.setUser(
@@ -85,6 +88,7 @@ function SignUpScreen(props) {
           id,
           accessToken,
           refreshToken,
+          appliedJobs,
         );
 
         role == 'CANDIDATE'

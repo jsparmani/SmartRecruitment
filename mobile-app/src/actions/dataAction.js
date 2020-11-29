@@ -10,6 +10,7 @@ export const setUser = (
   id,
   accessToken,
   refreshToken,
+  appliedJobs,
 ) => {
   return {
     type: 'SET_USER',
@@ -20,6 +21,7 @@ export const setUser = (
     id: id,
     accessToken: accessToken,
     refreshToken: refreshToken,
+    appliedJobs: refreshToken,
   };
 };
 export const updateToken = (refreshToken) => {
@@ -77,6 +79,13 @@ export const JobDetails = (jobs) => {
   };
 };
 
+export const UpdateAppliedJobs = (appliedJobs) => {
+  return {
+    type: 'UPDATE_APPLIED_JOBS',
+    appliedJobs: appliedJobs,
+  };
+};
+
 export const LogOut = () => {
   return {
     type: 'Log_Out',
@@ -91,6 +100,7 @@ export const setLoginUser = (
   accessToken,
   refreshToken,
   id,
+  appliedJobs,
   navigation,
 ) => {
   console.log('Action ', profile);
@@ -107,6 +117,7 @@ export const setLoginUser = (
       profile: profile,
       accessToken: accessToken,
       refreshToken: refreshToken,
+      appliedJobs: appliedJobs,
       id: id,
     };
   } else {

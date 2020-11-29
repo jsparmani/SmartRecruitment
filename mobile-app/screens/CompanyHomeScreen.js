@@ -203,7 +203,9 @@ function CompanyHomeScreen(props) {
                     }}>
                     <Text
                       onPress={() => {
-                        props.navigation.navigate('JobEdits', {});
+                        props.navigation.navigate('JobEdits', {
+                          details: item,
+                        });
                       }}
                       style={{
                         color: '#358C96',

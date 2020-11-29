@@ -2,14 +2,77 @@
 import React, {useEffect} from 'react';
 import {View, Text, Image, FlatList, StyleSheet} from 'react-native';
 import {connect} from 'react-redux';
-import {gql, useMutation} from '@apollo/client';
-import {updateToken} from '../src/actions/dataAction';
+import {gql, useMutation, useQuery} from '@apollo/client';
+import {
+  JobDetails,
+  UpdateAppliedJobs,
+  updateToken,
+} from '../src/actions/dataAction';
 import TextInputCustom from '../Components/TextInputCustom';
 import Icon from 'react-native-vector-icons/AntDesign';
 
+const job_query = gql`
+  query getJobs {
+    jobs {
+      id
+      title
+      description
+      requirements
+      department
+      questions
+      company {
+        id
+        name
+        location
+        admin {
+          profile {
+            photo
+            resume
+          }
+        }
+      }
+    }
+  }
+`;
+
+const me_query = gql`
+  query Me {
+    me {
+      user {
+        appliedJobs {
+          id
+        }
+      }
+    }
+  }
+`;
+
 function HomeScreen(props) {
   console.log('HomeSreen ', props.accessToken);
-  const tempData = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  const {data, err, load} = useQuery(job_query, {
+    onCompleted: async (data) => {
+      if (data.jobs != null) {
+        // console.log(data.jobs);
+        await props.JobDetails(data.jobs);
+      }
+    },
+  });
+  const {dataa, error, loading} = useQuery(me_query, {
+    onCompleted: async (data2) => {
+      if (data2.me.user != null) {
+        // console.log(data2.jobs);
+        var arr = props.appliedJobs;
+        data2.me.user.appliedJobs.map((item) => {
+          if (!arr.includes(item.id)) {
+            arr.push(item.id);
+          }
+        });
+        console.log(arr);
+        await props.UpdateAppliedJobs(arr);
+      }
+    },
+  });
 
   return (
     <View style={{backgroundColor: '#EAEEF1', flex: 1}}>
@@ -70,74 +133,97 @@ function HomeScreen(props) {
         </Text>
         <FlatList
           style={{flex: 1}}
-          data={tempData}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={() => (
-            <View style={styles.cardStyle}>
-              <View style={styles.logoStyle}>
-                <Image
-                  style={{width: '100%', height: '60%'}}
-                  resizeMode="contain"
-                  source={{
-                    uri:
-                      'https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png',
-                  }}
-                />
-              </View>
+          data={props.jobs == null ? [] : props.jobs}
+          ListEmptyComponent={() => {
+            return (
               <View
                 style={{
-                  width: '82%',
-                  paddingHorizontal: 12,
-                  paddingRight: 20,
-                  paddingTop: 10,
+                  flex: 1,
+                  alignItems: 'center',
+                  height: '100%',
                 }}>
-                <Text
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  style={{fontSize: 16}}>
-                  Software Developer Engineer
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  style={{fontSize: 13}}>
-                  Google 📍 Mumbai, IN
-                </Text>
+                <Image
+                  source={require('../assets/nodatafound.png')}
+                  style={{width: '100%', height: 200}}
+                  resizeMode="contain"
+                />
+              </View>
+            );
+          }}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({item, index}) => {
+            var loc = item.company.location.split(',');
+            var logo = item.company.admin.profile.photo;
+            return (
+              <View style={styles.cardStyle}>
+                <View style={styles.logoStyle}>
+                  <Image
+                    style={{width: '100%', height: '60%'}}
+                    resizeMode="contain"
+                    source={{
+                      uri: logo,
+                      // 'https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png',
+                    }}
+                  />
+                </View>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    width: '100%',
-                    justifyContent: 'space-between',
-                    marginTop: 'auto',
-                    height: 30,
+                    width: '82%',
+                    paddingHorizontal: 12,
+                    paddingRight: 20,
+                    paddingTop: 10,
                   }}>
                   <Text
-                    style={{
-                      color: '#358C96',
-                      width: 'auto',
-                      paddingHorizontal: 12,
-                      textAlignVertical: 'center',
-                      fontWeight: 'bold',
-                    }}>
-                    APPLY NOW
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    style={{fontSize: 16}}>
+                    {item.title}
                   </Text>
                   <Text
-                    onPress={() => {
-                      props.navigation.navigate('JobDetails');
-                    }}
-                    style={{
-                      color: '#358C96',
-                      width: 'auto',
-                      paddingHorizontal: 12,
-                      textAlignVertical: 'center',
-                      fontWeight: 'bold',
-                    }}>
-                    MORE...
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    style={{fontSize: 13}}>
+                    {item.company.name} 📍 {loc[loc.length - 3]},
+                    {loc[loc.length - 2]}
                   </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      width: '100%',
+                      justifyContent: 'flex-end',
+                      marginTop: 'auto',
+                      height: 30,
+                    }}>
+                    {/* <Text
+                      style={{
+                        color: '#358C96',
+                        width: 'auto',
+                        paddingHorizontal: 12,
+                        textAlignVertical: 'center',
+                        fontWeight: 'bold',
+                      }}>
+                      APPLY NOW
+                    </Text> */}
+                    <Text
+                      onPress={() => {
+                        props.navigation.navigate('JobDetails', {
+                          details: item,
+                        });
+                      }}
+                      style={{
+                        color: '#358C96',
+                        width: 'auto',
+                        paddingHorizontal: 12,
+                        textAlignVertical: 'center',
+                        fontWeight: 'bold',
+                      }}>
+                      MORE...
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
+            );
+          }}
         />
       </View>
     </View>
@@ -149,10 +235,16 @@ const mapStateToProps = (state) => {
     profile: state.authRed.profile,
     refreshToken: state.authRed.refreshToken,
     accessToken: state.authRed.accessToken,
+    jobs: state.authRed.jobs,
+    appliedJobs: state.authRed.appliedJobs,
   };
 };
 
-export default connect(mapStateToProps, {updateToken})(HomeScreen);
+export default connect(mapStateToProps, {
+  updateToken,
+  JobDetails,
+  UpdateAppliedJobs,
+})(HomeScreen);
 
 const styles = StyleSheet.create({
   cardStyle: {
